@@ -36,4 +36,4 @@ Participants will taste a progression of Kenji's creations, from subtle umami ac
 
 Adventurous pastry professionals, chefs interested in cross-cultural fusion, and anyone curious about expanding the flavor possibilities of dessert. Open minds required; open palates will follow.
 
-*"Umami is not about making desserts savory — it is about making them complete."* — Kenji Nakamura
+_"Umami is not about making desserts savory — it is about making them complete."_ — Kenji Nakamura

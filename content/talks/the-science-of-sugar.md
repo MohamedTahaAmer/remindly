@@ -36,4 +36,4 @@ Watch Priya work sugar through multiple stages, creating components for her sign
 
 Pastry professionals who want to understand their most important ingredient at a deeper level, curious bakers tired of following sugar recipes blindly, and anyone who has ever overcooked caramel and wondered exactly where they went wrong. All skill levels welcome.
 
-*"Sugar is not merely sweet — it is structure, texture, color, and flavor. Understanding its chemistry unlocks infinite possibilities."* — Priya Sharma
+_"Sugar is not merely sweet — it is structure, texture, color, and flavor. Understanding its chemistry unlocks infinite possibilities."_ — Priya Sharma

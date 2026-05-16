@@ -15,7 +15,7 @@ Kenji Nakamura stands at the fascinating intersection of Japanese precision and 
 
 After formal training at the Tokyo Pastry Academy, Kenji sought to deepen his French technique at Pierre Hermé Tokyo, where he spent five transformative years. There, he began experimenting with umami-forward flavor profiles in desserts — miso caramel, toasted nori chocolate, and yuzu integrated into classic French preparations.
 
-His creations challenge Western notions of sweetness while honoring both traditions. The "Matcha Millefeuille" — layers of impossibly thin, crisp pastry with ceremonial-grade matcha cream and white chocolate miso — has been called "a masterpiece of cultural synthesis" by the *Japan Times*.
+His creations challenge Western notions of sweetness while honoring both traditions. The "Matcha Millefeuille" — layers of impossibly thin, crisp pastry with ceremonial-grade matcha cream and white chocolate miso — has been called "a masterpiece of cultural synthesis" by the _Japan Times_.
 
 In 2020, Kenji opened Umami Flour in a converted machiya townhouse in Kyoto's historic Gion district. The space blends minimalist Japanese aesthetics with the warmth of a French salon de thé. His tasting menu of eight courses explores the full spectrum of umami in desserts, from subtle to profound, and has earned three stars from the Michelin Guide Japan.
 

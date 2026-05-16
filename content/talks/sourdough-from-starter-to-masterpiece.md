@@ -33,4 +33,4 @@ Participants will work with pre-fermented dough to practice shaping and scoring 
 
 Perfect for bread enthusiasts at any level who want to deepen their understanding of natural leavening. Whether you're troubleshooting your home starter or looking to add sourdough to your bakery menu, this session provides both scientific grounding and practical wisdom.
 
-*"Every loaf of sourdough carries within it the history of bread itself — a connection to every baker who came before."* — Isabella Martinez
+_"Every loaf of sourdough carries within it the history of bread itself — a connection to every baker who came before."_ — Isabella Martinez

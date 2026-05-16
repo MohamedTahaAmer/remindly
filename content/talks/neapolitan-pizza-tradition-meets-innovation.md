@@ -36,4 +36,4 @@ Watch Isabella shape and bake pizzas in real-time, explaining her movements, tim
 
 Pizza enthusiasts, bread bakers curious about pizza, and anyone interested in understanding how traditional techniques can be thoughtfully evolved. All skill levels welcome.
 
-*"Pizza is bread at its most generous — sharing its surface with whatever the season offers."* — Isabella Martinez
+_"Pizza is bread at its most generous — sharing its surface with whatever the season offers."_ — Isabella Martinez

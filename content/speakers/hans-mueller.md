@@ -17,6 +17,6 @@ Hans's formal training began at age fourteen as an apprentice in his father's ba
 
 What sets Hans apart is his scientific approach to an ancient craft. He has collaborated with food scientists at the Technical University of Munich to study the crystalline structure of butter at various temperatures, the gluten networks in different flour types, and the fermentation kinetics that create flavor. His findings have been published in academic journals and have influenced professional bakers worldwide.
 
-Das Brotwerk, his Munich bakery and teaching academy, opened in 2017. The space features a glass-walled production kitchen where visitors can observe the lamination process in real-time. His signature "288-Layer Croissant" — a technical feat requiring three days of preparation — has been called "the platonic ideal of the form" by *Die Zeit*.
+Das Brotwerk, his Munich bakery and teaching academy, opened in 2017. The space features a glass-walled production kitchen where visitors can observe the lamination process in real-time. His signature "288-Layer Croissant" — a technical feat requiring three days of preparation — has been called "the platonic ideal of the form" by _Die Zeit_.
 
 Hans is also dedicated to preserving traditional Germanic baking techniques, maintaining an archive of historical recipes and training the next generation in methods that might otherwise be lost.

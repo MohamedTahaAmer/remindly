@@ -1,4 +1,4 @@
-Welcome to your new TanStack Start app! 
+Welcome to your new TanStack Start app!
 
 # Getting Started
 
@@ -40,7 +40,6 @@ If you prefer not to use Tailwind CSS:
 
 ## Linting & Formatting
 
-
 This project uses [eslint](https://eslint.org/) and [prettier](https://prettier.io/) for linting and formatting. Eslint is configured using [tanstack/eslint-config](https://tanstack.com/config/latest/docs/eslint). The following scripts are available:
 
 ```bash
@@ -48,7 +47,6 @@ bun --bun run lint
 bun --bun run format
 bun --bun run check
 ```
-
 
 ## Deploy to Cloudflare Workers
 
@@ -62,7 +60,6 @@ For production env vars, run `wrangler secret put MY_VAR` for each secret listed
 
 KV, D1, R2, and Durable Object bindings are configured in `wrangler.jsonc` — see https://developers.cloudflare.com/workers/wrangler/configuration/.
 
-
 ## Shadcn
 
 Add components using the latest version of [Shadcn](https://ui.shadcn.com/).
@@ -70,7 +67,6 @@ Add components using the latest version of [Shadcn](https://ui.shadcn.com/).
 ```bash
 pnpm dlx shadcn@latest add button
 ```
-
 
 ## T3Env
 
@@ -81,14 +77,10 @@ pnpm dlx shadcn@latest add button
 ### Usage
 
 ```ts
-import { env } from "#/env";
+import { env } from "#/env"
 
-console.log(env.VITE_APP_TITLE);
+console.log(env.VITE_APP_TITLE)
 ```
-
-
-
-
 
 ## Setting up Better Auth
 
@@ -106,15 +98,15 @@ Better Auth can work in stateless mode, but to persist user data, add a database
 
 ```typescript
 // src/lib/auth.ts
-import { betterAuth } from "better-auth";
-import { Pool } from "pg";
+import { betterAuth } from "better-auth"
+import { Pool } from "pg"
 
 export const auth = betterAuth({
-  database: new Pool({
-    connectionString: process.env.DATABASE_URL,
-  }),
-  // ... rest of config
-});
+	database: new Pool({
+		connectionString: process.env.DATABASE_URL,
+	}),
+	// ... rest of config
+})
 ```
 
 Then run migrations:
@@ -122,7 +114,6 @@ Then run migrations:
 ```bash
 bunx --bun @better-auth/cli migrate
 ```
-
 
 ## Setting up PostHog
 
@@ -133,7 +124,6 @@ bunx --bun @better-auth/cli migrate
 ### Optional Configuration
 
 - `VITE_POSTHOG_HOST` - Set this if you're using PostHog Cloud EU (`https://eu.i.posthog.com`) or self-hosting
-
 
 # Events Example - Haute Pâtisserie 2026
 
@@ -147,17 +137,20 @@ A beautiful pastry conference website built with TanStack Start and Netlify, fea
 ## Features
 
 ### Content Management
+
 - Speaker profiles with bios, awards, and specialty information
 - Session details with topics, duration, and speaker attribution
 - All content in markdown files using content-collections
 
 ### AI-Powered Assistance
+
 - Chat with "Remy" the culinary assistant
 - Search for speakers and sessions by topic
 - Get recommendations based on interests
 - Supports multiple AI providers (Anthropic, OpenAI, Gemini, Ollama)
 
 ### Routes
+
 - `/` - Home page with featured speakers and sessions
 - `/schedule` - Conference schedule with day-by-day timeline
 - `/speakers` - All speakers grid
@@ -204,6 +197,7 @@ The assistant will automatically use the first available provider.
 ## Customization
 
 ### Adding Speakers
+
 Create a new markdown file in `content/speakers/`:
 
 ```markdown
@@ -223,6 +217,7 @@ Bio content here...
 ```
 
 ### Adding Sessions
+
 Create a new markdown file in `content/talks/`:
 
 ```markdown
@@ -242,11 +237,10 @@ Session description here...
 ## Theme
 
 The example uses a custom dark theme with:
+
 - **Font**: Playfair Display (display) and Cormorant Garamond (body)
 - **Colors**: Copper and gold accents on a dark charcoal background
 - **Effects**: Elegant card hover animations, grain texture overlay
-
-
 
 ## Routing
 
@@ -265,7 +259,7 @@ Now that you have two routes you can use a `Link` component to navigate between 
 To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
 
 ```tsx
-import { Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router"
 ```
 
 Then anywhere in your JSX you can use it like so:
@@ -285,33 +279,29 @@ In the File Based Routing setup the layout is located in `src/routes/__root.tsx`
 Here is an example layout that includes a header:
 
 ```tsx
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
+import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router"
 
 export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'My App' },
-    ],
-  }),
-  shellComponent: ({ children }) => (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <header>
-          <nav>
-            <Link to="/">Home</Link>
-            <Link to="/about">About</Link>
-          </nav>
-        </header>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  ),
+	head: () => ({
+		meta: [{ charSet: "utf-8" }, { name: "viewport", content: "width=device-width, initial-scale=1" }, { title: "My App" }],
+	}),
+	shellComponent: ({ children }) => (
+		<html lang="en">
+			<head>
+				<HeadContent />
+			</head>
+			<body>
+				<header>
+					<nav>
+						<Link to="/">Home</Link>
+						<Link to="/about">About</Link>
+					</nav>
+				</header>
+				{children}
+				<Scripts />
+			</body>
+		</html>
+	),
 })
 ```
 
@@ -322,23 +312,23 @@ More information on layouts can be found in the [Layouts documentation](https://
 TanStack Start provides server functions that allow you to write server-side code that seamlessly integrates with your client components.
 
 ```tsx
-import { createServerFn } from '@tanstack/react-start'
+import { createServerFn } from "@tanstack/react-start"
 
 const getServerTime = createServerFn({
-  method: 'GET',
+	method: "GET",
 }).handler(async () => {
-  return new Date().toISOString()
+	return new Date().toISOString()
 })
 
 // Use in a component
 function MyComponent() {
-  const [time, setTime] = useState('')
-  
-  useEffect(() => {
-    getServerTime().then(setTime)
-  }, [])
-  
-  return <div>Server time: {time}</div>
+	const [time, setTime] = useState("")
+
+	useEffect(() => {
+		getServerTime().then(setTime)
+	}, [])
+
+	return <div>Server time: {time}</div>
 }
 ```
 
@@ -347,15 +337,15 @@ function MyComponent() {
 You can create API routes by using the `server` property in your route definitions:
 
 ```tsx
-import { createFileRoute } from '@tanstack/react-router'
-import { json } from '@tanstack/react-start'
+import { createFileRoute } from "@tanstack/react-router"
+import { json } from "@tanstack/react-start"
 
-export const Route = createFileRoute('/api/hello')({
-  server: {
-    handlers: {
-      GET: () => json({ message: 'Hello, World!' }),
-    },
-  },
+export const Route = createFileRoute("/api/hello")({
+	server: {
+		handlers: {
+			GET: () => json({ message: "Hello, World!" }),
+		},
+	},
 })
 ```
 
@@ -366,25 +356,25 @@ There are multiple ways to fetch data in your application. You can use TanStack 
 For example:
 
 ```tsx
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from "@tanstack/react-router"
 
-export const Route = createFileRoute('/people')({
-  loader: async () => {
-    const response = await fetch('https://swapi.dev/api/people')
-    return response.json()
-  },
-  component: PeopleComponent,
+export const Route = createFileRoute("/people")({
+	loader: async () => {
+		const response = await fetch("https://swapi.dev/api/people")
+		return response.json()
+	},
+	component: PeopleComponent,
 })
 
 function PeopleComponent() {
-  const data = Route.useLoaderData()
-  return (
-    <ul>
-      {data.results.map((person) => (
-        <li key={person.name}>{person.name}</li>
-      ))}
-    </ul>
-  )
+	const data = Route.useLoaderData()
+	return (
+		<ul>
+			{data.results.map((person) => (
+				<li key={person.name}>{person.name}</li>
+			))}
+		</ul>
+	)
 }
 ```
 

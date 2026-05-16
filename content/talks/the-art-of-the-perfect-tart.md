@@ -29,4 +29,4 @@ The final touches transform a tart from homemade to haute cuisine. Learn Marie's
 
 This session is ideal for pastry professionals looking to refine their technique, serious home bakers ready to elevate their craft, and anyone who believes that the tart is the highest expression of French pastry artistry. Intermediate skill level recommended.
 
-*"A tart is not a vessel for filling — it is a complete composition where every element must sing in harmony."* — Marie Dubois
+_"A tart is not a vessel for filling — it is a complete composition where every element must sing in harmony."_ — Marie Dubois

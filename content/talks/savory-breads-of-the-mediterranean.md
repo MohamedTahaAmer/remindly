@@ -36,4 +36,4 @@ Samples of each bread discussed will be available for participants to taste and 
 
 Ideal for bakers interested in expanding beyond French and American bread traditions, food historians, and anyone who believes that understanding bread is understanding culture. All skill levels welcome.
 
-*"The Mediterranean is connected by wheat, water, and olive oil — and by the hands that have shaped bread along its shores for thousands of years."* — André Costa
+_"The Mediterranean is connected by wheat, water, and olive oil — and by the hands that have shaped bread along its shores for thousands of years."_ — André Costa

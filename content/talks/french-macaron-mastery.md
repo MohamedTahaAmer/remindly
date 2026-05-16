@@ -36,4 +36,4 @@ Bring your macaron problems to Marie. She'll address common issues — hollow sh
 
 Anyone who has ever sworn off macarons after too many failures, professionals looking to add macarons to their offerings, and bakers who want to understand these confections at a deeper level. Intermediate skill level recommended.
 
-*"The macaron teaches patience and precision. Master it, and every other pastry becomes simpler by comparison."* — Marie Dubois
+_"The macaron teaches patience and precision. Master it, and every other pastry becomes simpler by comparison."_ — Marie Dubois
