@@ -1,0 +1,34 @@
+{
+  "projectName": "remindly",
+  "mode": "file-router",
+  "typescript": true,
+  "packageManager": "bun",
+  "includeExamples": true,
+  "tailwind": true,
+  "addOnOptions": {
+    "drizzle": {
+      "database": "mysql"
+    }
+  },
+  "envVarValues": {},
+  "git": true,
+  "install": true,
+  "routerOnly": false,
+  "version": 1,
+  "framework": "react",
+  "chosenAddOns": [
+    "eslint",
+    "cloudflare",
+    "compiler",
+    "drizzle",
+    "form",
+    "shadcn",
+    "t3env",
+    "table",
+    "tRPC",
+    "better-auth",
+    "posthog",
+    "events",
+    "tanstack-query"
+  ]
+}
