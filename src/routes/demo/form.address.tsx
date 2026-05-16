@@ -22,7 +22,7 @@ function AddressForm() {
 		},
 		validators: {
 			onBlur: ({ value }) => {
-				const errors = {
+				const errors: { fields: Record<string, string> } = {
 					fields: {},
 				}
 				if (value.fullName.trim().length === 0) {
