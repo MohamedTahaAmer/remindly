@@ -5,6 +5,7 @@ import { TRPCError, type TRPCRouterRecord } from "@trpc/server"
 import { publicProcedure } from "../init"
 import { db } from "#/db"
 import { cards } from "#/db/schema"
+import { parseMarkdown } from "#/lib/markdown"
 
 const cardInput = z.object({
 	front: z.string().min(1).max(500),
@@ -21,6 +22,13 @@ export const cardsRouter = {
 		const [row] = await db.select().from(cards).where(eq(cards.id, input.id)).limit(1)
 		if (!row) throw new TRPCError({ code: "NOT_FOUND", message: "Card not found" })
 		return row
+	}),
+
+	details: publicProcedure.input(z.object({ id: z.number().int() })).query(async ({ input }) => {
+		const [row] = await db.select().from(cards).where(eq(cards.id, input.id)).limit(1)
+		if (!row) throw new TRPCError({ code: "NOT_FOUND", message: "Card not found" })
+		const detailsHtml = row.detailsMarkdown ? await parseMarkdown(row.detailsMarkdown) : null
+		return { detailsHtml }
 	}),
 
 	create: publicProcedure.input(cardInput).mutation(async ({ input }) => {
@@ -51,6 +59,7 @@ export const cardsRouter = {
 		return { ok: true }
 	}),
 
+	// Cards whose next review is due, plus K random non-due "surprise" cards.
 	dueToday: publicProcedure
 		.input(z.object({ extraRandom: z.number().int().min(0).max(20).default(3) }).optional())
 		.query(async ({ input }) => {
@@ -74,6 +83,7 @@ export const cardsRouter = {
 			return { due, random }
 		}),
 
+	// Ad-hoc "surprise me" — N random cards regardless of schedule.
 	surprise: publicProcedure
 		.input(z.object({ n: z.number().int().min(1).max(20).default(5) }).optional())
 		.query(async ({ input }) => {
