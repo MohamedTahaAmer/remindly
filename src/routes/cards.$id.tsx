@@ -1,26 +1,27 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { useQuery } from "@tanstack/react-query"
-import { marked } from "marked"
 import { useTRPC } from "#/integrations/trpc/react"
+import { parseMarkdown } from "#/lib/markdown"
 
 export const Route = createFileRoute("/cards/$id")({
 	component: CardDetail,
 	loader: async ({ context, params }) => {
-		await context.queryClient.prefetchQuery(
+		const card = await context.queryClient.fetchQuery(
 			context.trpc.cards.get.queryOptions({ id: Number(params.id) }),
 		)
+		const detailsHtml = card.detailsMarkdown ? await parseMarkdown(card.detailsMarkdown) : null
+		return { detailsHtml }
 	},
 })
 
 function CardDetail() {
 	const { id } = Route.useParams()
+	const { detailsHtml } = Route.useLoaderData()
 	const trpc = useTRPC()
 	const { data: card, isLoading } = useQuery(trpc.cards.get.queryOptions({ id: Number(id) }))
 
 	if (isLoading) return <div className="text-muted-foreground">Loading…</div>
 	if (!card) return <div className="text-muted-foreground">Not found</div>
-
-	const html = card.detailsMarkdown ? marked.parse(card.detailsMarkdown) : null
 
 	return (
 		<article className="space-y-6 max-w-3xl">
@@ -34,12 +35,9 @@ function CardDetail() {
 				</Link>
 			</header>
 
-			{html ? (
+			{detailsHtml ? (
 				<div className="rounded-xl border border-border bg-card p-6">
-					<div
-						className="prose prose-sm max-w-none prose-headings:text-foreground prose-p:text-foreground prose-a:text-sage prose-strong:text-foreground prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:rounded"
-						dangerouslySetInnerHTML={{ __html: html as string }}
-					/>
+					<div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: detailsHtml }} />
 				</div>
 			) : (
 				<div className="text-muted-foreground text-sm">No details for this card.</div>
