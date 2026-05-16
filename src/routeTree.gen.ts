@@ -17,7 +17,7 @@ import { Route as CardsNewRouteImport } from './routes/cards.new'
 import { Route as CardsIdRouteImport } from './routes/cards.$id'
 import { Route as DemoFormSimpleRouteImport } from './routes/demo/form.simple'
 import { Route as DemoFormAddressRouteImport } from './routes/demo/form.address'
-import { Route as CardsIdEditRouteImport } from './routes/cards.$id.edit'
+import { Route as CardsIdEditRouteImport } from './routes/cards.$id_.edit'
 import { Route as ApiTrpcSplatRouteImport } from './routes/api.trpc.$'
 
 const IndexRoute = IndexRouteImport.update({
@@ -61,9 +61,9 @@ const DemoFormAddressRoute = DemoFormAddressRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const CardsIdEditRoute = CardsIdEditRouteImport.update({
-  id: '/edit',
-  path: '/edit',
-  getParentRoute: () => CardsIdRoute,
+  id: '/cards/$id_/edit',
+  path: '/cards/$id/edit',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
   id: '/api/trpc/$',
@@ -73,7 +73,7 @@ const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/cards/$id': typeof CardsIdRouteWithChildren
+  '/cards/$id': typeof CardsIdRoute
   '/cards/new': typeof CardsNewRoute
   '/demo/table': typeof DemoTableRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
@@ -85,7 +85,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/cards/$id': typeof CardsIdRouteWithChildren
+  '/cards/$id': typeof CardsIdRoute
   '/cards/new': typeof CardsNewRoute
   '/demo/table': typeof DemoTableRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
@@ -98,13 +98,13 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/cards/$id': typeof CardsIdRouteWithChildren
+  '/cards/$id': typeof CardsIdRoute
   '/cards/new': typeof CardsNewRoute
   '/demo/table': typeof DemoTableRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/cards/': typeof CardsIndexRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
-  '/cards/$id/edit': typeof CardsIdEditRoute
+  '/cards/$id_/edit': typeof CardsIdEditRoute
   '/demo/form/address': typeof DemoFormAddressRoute
   '/demo/form/simple': typeof DemoFormSimpleRoute
 }
@@ -142,19 +142,20 @@ export interface FileRouteTypes {
     | '/demo/tanstack-query'
     | '/cards/'
     | '/api/trpc/$'
-    | '/cards/$id/edit'
+    | '/cards/$id_/edit'
     | '/demo/form/address'
     | '/demo/form/simple'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  CardsIdRoute: typeof CardsIdRouteWithChildren
+  CardsIdRoute: typeof CardsIdRoute
   CardsNewRoute: typeof CardsNewRoute
   DemoTableRoute: typeof DemoTableRoute
   DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
   CardsIndexRoute: typeof CardsIndexRoute
   ApiTrpcSplatRoute: typeof ApiTrpcSplatRoute
+  CardsIdEditRoute: typeof CardsIdEditRoute
   DemoFormAddressRoute: typeof DemoFormAddressRoute
   DemoFormSimpleRoute: typeof DemoFormSimpleRoute
 }
@@ -217,12 +218,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoFormAddressRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/cards/$id/edit': {
-      id: '/cards/$id/edit'
-      path: '/edit'
+    '/cards/$id_/edit': {
+      id: '/cards/$id_/edit'
+      path: '/cards/$id/edit'
       fullPath: '/cards/$id/edit'
       preLoaderRoute: typeof CardsIdEditRouteImport
-      parentRoute: typeof CardsIdRoute
+      parentRoute: typeof rootRouteImport
     }
     '/api/trpc/$': {
       id: '/api/trpc/$'
@@ -234,25 +235,15 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface CardsIdRouteChildren {
-  CardsIdEditRoute: typeof CardsIdEditRoute
-}
-
-const CardsIdRouteChildren: CardsIdRouteChildren = {
-  CardsIdEditRoute: CardsIdEditRoute,
-}
-
-const CardsIdRouteWithChildren =
-  CardsIdRoute._addFileChildren(CardsIdRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  CardsIdRoute: CardsIdRouteWithChildren,
+  CardsIdRoute: CardsIdRoute,
   CardsNewRoute: CardsNewRoute,
   DemoTableRoute: DemoTableRoute,
   DemoTanstackQueryRoute: DemoTanstackQueryRoute,
   CardsIndexRoute: CardsIndexRoute,
   ApiTrpcSplatRoute: ApiTrpcSplatRoute,
+  CardsIdEditRoute: CardsIdEditRoute,
   DemoFormAddressRoute: DemoFormAddressRoute,
   DemoFormSimpleRoute: DemoFormSimpleRoute,
 }

@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { useQuery } from "@tanstack/react-query"
 import { useTRPC } from "#/integrations/trpc/react"
-import { parseMarkdown } from "#/lib/markdown"
+import { parseInlineMarkdown, parseMarkdown } from "#/lib/markdown"
 
 export const Route = createFileRoute("/cards/$id")({
 	component: CardDetail,
@@ -27,7 +27,10 @@ function CardDetail() {
 		<article className="space-y-6 max-w-3xl">
 			<header className="flex items-start justify-between gap-4">
 				<div>
-					<h1 className="text-3xl font-semibold tracking-tight">{card.front}</h1>
+					<h1
+						className="text-3xl font-semibold tracking-tight [overflow-wrap:anywhere] [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:font-mono [&_code]:text-[0.9em]"
+						dangerouslySetInnerHTML={{ __html: parseInlineMarkdown(card.front) }}
+					/>
 					<p className="text-muted-foreground mt-2 whitespace-pre-wrap">{card.back}</p>
 				</div>
 				<Link to="/cards/$id/edit" params={{ id }} className="text-sm text-muted-foreground hover:text-foreground shrink-0">
