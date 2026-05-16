@@ -2,7 +2,7 @@ import { drizzle } from "drizzle-orm/mysql2"
 
 import * as schema from "./schema.ts"
 
-export const db = drizzle(process.env.DATABASE_URL!, {
-	schema,
-	mode: "default",
-})
+const url = process.env.DATABASE_URI
+if (!url) throw new Error("DATABASE_URI is not set")
+
+export const db = drizzle(url, { schema, mode: "default" })
