@@ -32,10 +32,7 @@ export const reviewRouter = {
 				scheduledFor,
 			})
 
-			await db
-				.update(cards)
-				.set({ intervalIndex, scheduledFor })
-				.where(eq(cards.id, card.id))
+			await db.update(cards).set({ intervalIndex, scheduledFor }).where(eq(cards.id, card.id))
 
 			return { intervalIndex, scheduledFor }
 		}),

@@ -9,7 +9,7 @@ export const MAX_INTERVAL_INDEX = INTERVALS_DAYS.length - 1
 
 export function intervalDaysFor(index: number): number {
 	const clamped = Math.max(0, Math.min(index, MAX_INTERVAL_INDEX))
-	return INTERVALS_DAYS[clamped]!
+	return INTERVALS_DAYS[clamped]
 }
 
 // SM-2-style adjustment on top of the fixed ladder.
@@ -30,7 +30,11 @@ export function nextIntervalIndex(current: number, rating: ReviewRating): number
 	}
 }
 
-export function nextScheduledFor(rating: ReviewRating, currentIndex: number, from: Date = new Date()): {
+export function nextScheduledFor(
+	rating: ReviewRating,
+	currentIndex: number,
+	from: Date = new Date(),
+): {
 	intervalIndex: number
 	scheduledFor: Date
 } {

@@ -22,7 +22,10 @@ A `type` alias is **closed** — TS knows the full key set and can verify each v
 type TagInputs = Record<string, string | number | null | undefined>
 
 // 1. interface → Record: FAILS
-interface UserInterface { id: number; name: string | null }
+interface UserInterface {
+	id: number
+	name: string | null
+}
 const tags1: TagInputs = userI // ❌
 
 // 2. type alias → Record: WORKS
@@ -34,13 +37,17 @@ const tags3: TagInputs = { ...userI } // ✅
 
 // 4. interface WITH explicit index signature: WORKS
 interface UserInterfaceIndexed {
-  [key: string]: string | number | null | undefined
-  id: number
+	[key: string]: string | number | null | undefined
+	id: number
 }
 
 // 5. declaration merging proves why TS is strict:
-interface Mergeable { id: number }
-interface Mergeable { tag: string } // legal — silently merges
+interface Mergeable {
+	id: number
+}
+interface Mergeable {
+	tag: string
+} // legal — silently merges
 ```
 
 ## Why no `extend` keyword for merging?

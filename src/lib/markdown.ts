@@ -1,6 +1,7 @@
 import { Marked } from "marked"
 import markedShiki from "marked-shiki"
-import { createHighlighter, type Highlighter } from "shiki"
+import { createHighlighter } from "shiki"
+import type { Highlighter } from "shiki"
 
 const LANGUAGES = [
 	"typescript",
@@ -55,5 +56,5 @@ export async function parseMarkdown(md: string): Promise<string> {
 // `code` spans, **bold**, *italic*, etc. Safe to call on the client.
 const inlineMarked = new Marked()
 export function parseInlineMarkdown(md: string): string {
-	return inlineMarked.parseInline(md, { async: false }) as string
+	return inlineMarked.parseInline(md, { async: false })
 }

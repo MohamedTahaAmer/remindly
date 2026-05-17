@@ -42,8 +42,10 @@ const fuzzySort: SortingFn<any> = (rowA, rowB, columnId) => {
 	let dir = 0
 
 	// Only sort by rank if the column has ranking information
-	if (rowA.columnFiltersMeta[columnId]) {
-		dir = compareItems(rowA.columnFiltersMeta[columnId]?.itemRank, rowB.columnFiltersMeta[columnId]?.itemRank)
+	const metaA = rowA.columnFiltersMeta[columnId] as { itemRank: RankingInfo } | undefined
+	const metaB = rowB.columnFiltersMeta[columnId] as { itemRank: RankingInfo } | undefined
+	if (metaA && metaB) {
+		dir = compareItems(metaA.itemRank, metaB.itemRank)
 	}
 
 	// Provide an alphanumeric fallback for when the item ranks are equal
@@ -125,7 +127,7 @@ function TableDemo() {
 		<div className="min-h-screen bg-gray-900 p-6">
 			<div>
 				<DebouncedInput
-					value={globalFilter ?? ""}
+					value={globalFilter}
 					onChange={(value) => setGlobalFilter(String(value))}
 					className="w-full p-3 bg-gray-800 text-white rounded-lg border border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
 					placeholder="Search all columns..."

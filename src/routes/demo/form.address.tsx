@@ -32,7 +32,7 @@ function AddressForm() {
 			},
 		},
 		onSubmit: ({ value }) => {
-			  console.log(...oo_oo(`580656950_37_6_37_24_4`, value))
+			console.log(...oo_oo(`580656950_37_6_37_24_4`, value))
 			// Show success message
 			alert("Form submitted successfully!")
 		},

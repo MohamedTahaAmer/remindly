@@ -32,22 +32,14 @@ function HomePage() {
 				<div>
 					<h1 className="text-3xl font-semibold tracking-tight">Today</h1>
 					<p className="text-muted-foreground text-sm mt-1">
-						{total === 0
-							? "No cards due. Add one or try Surprise me."
-							: `${due.length} due · ${random.length} bonus`}
+						{total === 0 ? "No cards due. Add one or try Surprise me." : `${due.length} due · ${random.length} bonus`}
 					</p>
 				</div>
 				<div className="flex gap-2">
-					<button
-						onClick={() => setSurprise((s) => !s)}
-						className="rounded-md border border-border bg-card hover:bg-muted px-3 py-2 text-sm transition"
-					>
+					<button onClick={() => setSurprise((s) => !s)} className="rounded-md border border-border bg-card hover:bg-muted px-3 py-2 text-sm transition">
 						{surprise ? "Hide surprise" : "Surprise me"}
 					</button>
-					<Link
-						to="/cards/new"
-						className="rounded-md bg-sage hover:opacity-90 px-3 py-2 text-sm font-medium text-white transition"
-					>
+					<Link to="/cards/new" className="rounded-md bg-sage hover:opacity-90 px-3 py-2 text-sm font-medium text-white transition">
 						New card
 					</Link>
 				</div>
@@ -89,7 +81,9 @@ function HomePage() {
 				<section className="space-y-4">
 					<h2 className="text-xs uppercase tracking-wider text-muted-foreground">Surprise</h2>
 					<div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-						{surpriseQuery.data?.map((card) => <ReviewCard key={card.id} card={card} />)}
+						{surpriseQuery.data?.map((card) => (
+							<ReviewCard key={card.id} card={card} />
+						))}
 					</div>
 				</section>
 			)}

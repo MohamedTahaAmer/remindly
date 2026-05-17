@@ -6,9 +6,7 @@ import { parseInlineMarkdown, parseMarkdown } from "#/lib/markdown"
 export const Route = createFileRoute("/cards/$id")({
 	component: CardDetail,
 	loader: async ({ context, params }) => {
-		const card = await context.queryClient.fetchQuery(
-			context.trpc.cards.get.queryOptions({ id: Number(params.id) }),
-		)
+		const card = await context.queryClient.fetchQuery(context.trpc.cards.get.queryOptions({ id: Number(params.id) }))
 		const detailsHtml = card.detailsMarkdown ? await parseMarkdown(card.detailsMarkdown) : null
 		return { detailsHtml }
 	},

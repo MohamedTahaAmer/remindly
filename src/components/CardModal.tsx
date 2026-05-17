@@ -1,8 +1,7 @@
-import { Link } from "@tanstack/react-router"
+import { Link, useRouter } from "@tanstack/react-router"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { Dialog } from "radix-ui"
 import { X } from "lucide-react"
-import { useRouter } from "@tanstack/react-router"
 import { useTRPC } from "#/integrations/trpc/react"
 import { parseInlineMarkdown } from "#/lib/markdown"
 import { intervalDaysFor, nextIntervalIndex } from "#/lib/schedule"
@@ -77,10 +76,7 @@ export function CardModal({ card, open, onOpenChange }: { card: Card; open: bool
 								{detailsQuery.isLoading ? (
 									<div className="text-sm text-muted-foreground">Loading…</div>
 								) : (
-									<div
-										className="prose prose-sm max-w-none"
-										dangerouslySetInnerHTML={{ __html: detailsQuery.data?.detailsHtml ?? "" }}
-									/>
+									<div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: detailsQuery.data?.detailsHtml ?? "" }} />
 								)}
 							</section>
 						)}

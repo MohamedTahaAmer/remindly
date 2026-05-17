@@ -19,6 +19,7 @@ Run this workflow. Commits are already made on the current branch — just push 
    Use `gh pr create --base staging` with:
    - **Title**: derive from the branch name — convert `type/description-here` to a readable title (e.g. `fix/generated-images-miss-position` → `fix: generated images miss position`). Keep it under 70 characters.
    - **Body**: use this format (pass via HEREDOC for correct formatting):
+
      ```
      ## Summary
      <2-4 bullet points summarizing the changes based on the commit messages and diffs>
@@ -26,6 +27,7 @@ Run this workflow. Commits are already made on the current branch — just push 
      ## Commits
      <paste the output of `git log origin/staging..HEAD --oneline`>
      ```
-   If a PR already exists for this branch, tell the user and skip creation.
+
+     If a PR already exists for this branch, tell the user and skip creation.
 
 Do the steps in order. Do not create new commits or modify existing ones. Do not rebase or merge. Just push what's there and open the PR.

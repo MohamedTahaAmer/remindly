@@ -45,19 +45,17 @@ export const cardsRouter = {
 		return { id: res.id }
 	}),
 
-	update: publicProcedure
-		.input(cardInput.extend({ id: z.number().int() }))
-		.mutation(async ({ input }) => {
-			await db
-				.update(cards)
-				.set({
-					front: input.front,
-					back: input.back,
-					detailsMarkdown: input.detailsMarkdown ?? null,
-				})
-				.where(eq(cards.id, input.id))
-			return { ok: true }
-		}),
+	update: publicProcedure.input(cardInput.extend({ id: z.number().int() })).mutation(async ({ input }) => {
+		await db
+			.update(cards)
+			.set({
+				front: input.front,
+				back: input.back,
+				detailsMarkdown: input.detailsMarkdown ?? null,
+			})
+			.where(eq(cards.id, input.id))
+		return { ok: true }
+	}),
 
 	delete: publicProcedure.input(z.object({ id: z.number().int() })).mutation(async ({ input }) => {
 		await db.delete(cards).where(eq(cards.id, input.id))
@@ -65,34 +63,34 @@ export const cardsRouter = {
 	}),
 
 	// Cards whose next review is due, plus K random non-due "surprise" cards.
-	dueToday: publicProcedure
-		.input(z.object({ extraRandom: z.number().int().min(0).max(20).default(3) }).optional())
-		.query(async ({ input }) => {
-			const extraRandom = input?.extraRandom ?? 3
-			const now = new Date()
+	dueToday: publicProcedure.input(z.object({ extraRandom: z.number().int().min(0).max(20).default(3) }).optional()).query(async ({ input }) => {
+		const extraRandom = input?.extraRandom ?? 3
+		const now = new Date()
 
-			const due = await db.select().from(cards).where(lte(cards.scheduledFor, now)).orderBy(cards.scheduledFor)
-			const dueIds = new Set(due.map((c) => c.id))
+		const due = await db.select().from(cards).where(lte(cards.scheduledFor, now)).orderBy(cards.scheduledFor)
+		const dueIds = new Set(due.map((c) => c.id))
 
-			let random: typeof due = []
-			if (extraRandom > 0) {
-				const all = await db
-					.select()
-					.from(cards)
-					.where(and(...(dueIds.size ? [ne(cards.id, -1)] : [])))
-					.orderBy(sql`RAND()`)
-					.limit(extraRandom + dueIds.size)
-				random = all.filter((c) => !dueIds.has(c.id)).slice(0, extraRandom)
-			}
+		let random: typeof due = []
+		if (extraRandom > 0) {
+			const all = await db
+				.select()
+				.from(cards)
+				.where(and(...(dueIds.size ? [ne(cards.id, -1)] : [])))
+				.orderBy(sql`RAND()`)
+				.limit(extraRandom + dueIds.size)
+			random = all.filter((c) => !dueIds.has(c.id)).slice(0, extraRandom)
+		}
 
-			return { due, random }
-		}),
+		return { due, random }
+	}),
 
 	// Ad-hoc "surprise me" — N random cards regardless of schedule.
-	surprise: publicProcedure
-		.input(z.object({ n: z.number().int().min(1).max(20).default(5) }).optional())
-		.query(async ({ input }) => {
-			const n = input?.n ?? 5
-			return db.select().from(cards).orderBy(sql`RAND()`).limit(n)
-		}),
+	surprise: publicProcedure.input(z.object({ n: z.number().int().min(1).max(20).default(5) }).optional()).query(async ({ input }) => {
+		const n = input?.n ?? 5
+		return db
+			.select()
+			.from(cards)
+			.orderBy(sql`RAND()`)
+			.limit(n)
+	}),
 } satisfies TRPCRouterRecord

@@ -19,11 +19,7 @@ interface MyRouterContext {
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
 	head: () => ({
-		meta: [
-			{ charSet: "utf-8" },
-			{ name: "viewport", content: "width=device-width, initial-scale=1" },
-			{ title: "Remindly" },
-		],
+		meta: [{ charSet: "utf-8" }, { name: "viewport", content: "width=device-width, initial-scale=1" }, { title: "Remindly" }],
 		links: [
 			{ rel: "stylesheet", href: appCss },
 			{ rel: "icon", type: "image/svg+xml", href: "/logo.svg" },
@@ -64,10 +60,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<main className="max-w-6xl mx-auto px-6 py-8">{children}</main>
 				<TanStackDevtools
 					config={{ position: "bottom-right" }}
-					plugins={[
-						{ name: "Tanstack Router", render: <TanStackRouterDevtoolsPanel /> },
-						TanStackQueryDevtools,
-					]}
+					plugins={[{ name: "Tanstack Router", render: <TanStackRouterDevtoolsPanel /> }, TanStackQueryDevtools]}
 				/>
 				<Scripts />
 			</body>

@@ -7,9 +7,7 @@ import { parseInlineMarkdown, parseMarkdown } from "#/lib/markdown"
 export const Route = createFileRoute("/cards/$id_/edit")({
 	component: EditCard,
 	loader: async ({ context, params }) => {
-		await context.queryClient.prefetchQuery(
-			context.trpc.cards.get.queryOptions({ id: Number(params.id) }),
-		)
+		await context.queryClient.prefetchQuery(context.trpc.cards.get.queryOptions({ id: Number(params.id) }))
 	},
 })
 
@@ -108,49 +106,28 @@ function EditCard() {
 				<div className="space-y-4 overflow-y-auto pr-2 flex flex-col">
 					<label className="block">
 						<div className="text-sm text-muted-foreground mb-1.5">Title (front, markdown)</div>
-						<input
-							value={front}
-							onChange={(e) => setFront(e.target.value)}
-							required
-							className={fieldClass}
-						/>
+						<input value={front} onChange={(e) => setFront(e.target.value)} required className={fieldClass} />
 					</label>
 
 					<label className="block">
 						<div className="text-sm text-muted-foreground mb-1.5">Back</div>
-						<textarea
-							value={back}
-							onChange={(e) => setBack(e.target.value)}
-							required
-							rows={4}
-							className={fieldClass}
-						/>
+						<textarea value={back} onChange={(e) => setBack(e.target.value)} required rows={4} className={fieldClass} />
 					</label>
 
 					<label className="flex flex-col flex-1 min-h-0">
 						<div className="text-sm text-muted-foreground mb-1.5">Details (markdown)</div>
-						<textarea
-							value={details}
-							onChange={(e) => setDetails(e.target.value)}
-							className={`${fieldClass} font-mono text-sm flex-1 resize-none`}
-						/>
+						<textarea value={details} onChange={(e) => setDetails(e.target.value)} className={`${fieldClass} font-mono text-sm flex-1 resize-none`} />
 					</label>
 				</div>
 
 				<div className="overflow-y-auto rounded-xl border border-border bg-card p-6 space-y-6">
 					<div className="text-[10px] uppercase tracking-wider text-muted-foreground">Preview</div>
 					<div>
-						<h2
-							className={titleClass}
-							dangerouslySetInnerHTML={{ __html: parseInlineMarkdown(front || " ") }}
-						/>
+						<h2 className={titleClass} dangerouslySetInnerHTML={{ __html: parseInlineMarkdown(front || " ") }} />
 						<p className="text-muted-foreground mt-2 whitespace-pre-wrap">{back}</p>
 					</div>
 					{detailsHtml ? (
-						<div
-							className="prose prose-sm max-w-none"
-							dangerouslySetInnerHTML={{ __html: detailsHtml }}
-						/>
+						<div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: detailsHtml }} />
 					) : (
 						<div className="text-muted-foreground text-sm">No details.</div>
 					)}

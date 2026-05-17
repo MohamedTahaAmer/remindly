@@ -41,12 +41,7 @@ function NewCard() {
 			</Field>
 
 			<Field label="Details (optional, markdown — shown on the lesson page)">
-				<textarea
-					value={details}
-					onChange={(e) => setDetails(e.target.value)}
-					rows={8}
-					className={`${fieldClass} font-mono text-sm`}
-				/>
+				<textarea value={details} onChange={(e) => setDetails(e.target.value)} rows={8} className={`${fieldClass} font-mono text-sm`} />
 			</Field>
 
 			<div className="flex gap-2">

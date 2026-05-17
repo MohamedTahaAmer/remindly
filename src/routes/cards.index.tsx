@@ -22,9 +22,7 @@ function CardsList() {
 				</Link>
 			</header>
 
-			{!data?.length && (
-				<div className="rounded-xl border border-dashed border-border p-12 text-center text-muted-foreground">No cards yet.</div>
-			)}
+			{!data?.length && <div className="rounded-xl border border-dashed border-border p-12 text-center text-muted-foreground">No cards yet.</div>}
 
 			<ul className="divide-y divide-border rounded-xl border border-border bg-card">
 				{data?.map((c) => (

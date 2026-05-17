@@ -48,16 +48,16 @@ So when you open Terminal on a Mac and type `ls`, `grep`, `ssh`, or write a `bas
 
 ## Practical consequences
 
-| Thing                        | macOS                | Linux                | Windows                                   |
-| ---------------------------- | -------------------- | -------------------- | ----------------------------------------- |
-| Filesystem root              | `/`                  | `/`                  | `C:\`, `D:\`, ...                          |
-| Case sensitivity (default)   | insensitive\*        | sensitive            | insensitive                               |
-| Path separator               | `/`                  | `/`                  | `\` (and sometimes `/`)                   |
-| Line endings                 | `\n`                 | `\n`                 | `\r\n`                                    |
-| Shell                        | `zsh`/`bash`         | `bash`/`zsh`/`sh`    | `cmd`, PowerShell (Bash via WSL)          |
-| Process model                | `fork`/`exec`        | `fork`/`exec`        | `CreateProcess` (no `fork`)               |
-| Package manager              | Homebrew (community) | apt/dnf/pacman/...   | winget / Chocolatey                       |
-| Dev toolchain "just works"   | usually              | usually              | often needs WSL or adapters               |
+| Thing                      | macOS                | Linux              | Windows                          |
+| -------------------------- | -------------------- | ------------------ | -------------------------------- |
+| Filesystem root            | `/`                  | `/`                | `C:\`, `D:\`, ...                |
+| Case sensitivity (default) | insensitive\*        | sensitive          | insensitive                      |
+| Path separator             | `/`                  | `/`                | `\` (and sometimes `/`)          |
+| Line endings               | `\n`                 | `\n`               | `\r\n`                           |
+| Shell                      | `zsh`/`bash`         | `bash`/`zsh`/`sh`  | `cmd`, PowerShell (Bash via WSL) |
+| Process model              | `fork`/`exec`        | `fork`/`exec`      | `CreateProcess` (no `fork`)      |
+| Package manager            | Homebrew (community) | apt/dnf/pacman/... | winget / Chocolatey              |
+| Dev toolchain "just works" | usually              | usually            | often needs WSL or adapters      |
 
 \*macOS uses HFS+/APFS which can be configured case-sensitive but defaults to insensitive — a common source of "works on Linux, not on Mac" CI bugs.
 

@@ -1,6 +1,7 @@
 import { Moon, Sun } from "lucide-react"
 import { DropdownMenu } from "radix-ui"
-import { useTheme, type Theme } from "#/lib/theme"
+import { useTheme } from "#/lib/theme"
+import type { Theme } from "#/lib/theme"
 
 const ITEMS: { value: Theme; label: string }[] = [
 	{ value: "light", label: "Light" },

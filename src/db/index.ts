@@ -10,14 +10,9 @@ const isLocal = /@(localhost|127\.0\.0\.1)/.test(url)
 
 async function makeDb() {
 	if (isLocal) {
-		const [{ drizzle }, mysqlMod] = await Promise.all([
-			import("drizzle-orm/mysql2"),
-			import("mysql2/promise"),
-		])
+		const [{ drizzle }, mysqlMod] = await Promise.all([import("drizzle-orm/mysql2"), import("mysql2/promise")])
 		const pool = mysqlMod.default.createPool({ uri: url! })
-		return drizzle(pool, { schema, mode: "default" }) as unknown as ReturnType<
-			typeof drizzleTidb<typeof schema>
-		>
+		return drizzle(pool, { schema, mode: "default" }) as unknown as ReturnType<typeof drizzleTidb<typeof schema>>
 	}
 	return drizzleTidb(connect({ url: url! }), { schema })
 }

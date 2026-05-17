@@ -22,7 +22,7 @@ function SimpleForm() {
 			onBlur: schema,
 		},
 		onSubmit: ({ value }) => {
-			  console.log(...oo_oo(`3001660924_25_6_25_24_4`, value))
+			console.log(...oo_oo(`3001660924_25_6_25_24_4`, value))
 			// Show success message
 			alert("Form submitted successfully!")
 		},
