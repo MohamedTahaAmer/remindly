@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-condition -- tidb-serverless drizzle adapter types select results as non-nullable, but empty rowsets are real */
 import { z } from "zod"
 import { and, desc, eq, lte, ne, sql } from "drizzle-orm"
-import { TRPCError, type TRPCRouterRecord } from "@trpc/server"
+import type { TRPCRouterRecord } from "@trpc/server"
+import { TRPCError } from "@trpc/server"
 
 import { publicProcedure } from "../init"
 import { db } from "#/db"
@@ -32,12 +34,15 @@ export const cardsRouter = {
 	}),
 
 	create: publicProcedure.input(cardInput).mutation(async ({ input }) => {
-		const [res] = await db.insert(cards).values({
-			front: input.front,
-			back: input.back,
-			detailsMarkdown: input.detailsMarkdown ?? null,
-		})
-		return { id: res.insertId }
+		const [res] = await db
+			.insert(cards)
+			.values({
+				front: input.front,
+				back: input.back,
+				detailsMarkdown: input.detailsMarkdown ?? null,
+			})
+			.$returningId()
+		return { id: res.id }
 	}),
 
 	update: publicProcedure

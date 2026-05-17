@@ -67,17 +67,21 @@ let updated = 0
 for (const c of seeds) {
 	const [existing] = await db.select({ id: cards.id }).from(cards).where(eq(cards.front, c.front)).limit(1)
 
+	// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- tidb-serverless types select rows as non-nullable, but the array can be empty
 	if (existing?.id) {
 		await db.update(cards).set({ back: c.back, detailsMarkdown: c.detailsMarkdown }).where(eq(cards.id, existing.id))
 		console.log(`Updated card #${existing.id}: ${c.front}`)
 		updated++
 	} else {
-		const [res] = await db.insert(cards).values({
-			front: c.front,
-			back: c.back,
-			detailsMarkdown: c.detailsMarkdown,
-		})
-		console.log(`Inserted card #${res.insertId}: ${c.front}`)
+		const [res] = await db
+			.insert(cards)
+			.values({
+				front: c.front,
+				back: c.back,
+				detailsMarkdown: c.detailsMarkdown,
+			})
+			.$returningId()
+		console.log(`Inserted card #${res.id}: ${c.front}`)
 		inserted++
 	}
 }

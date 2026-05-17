@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-condition -- tidb-serverless drizzle adapter types select results as non-nullable, but empty rowsets are real */
 import { z } from "zod"
 import { eq } from "drizzle-orm"
-import { TRPCError, type TRPCRouterRecord } from "@trpc/server"
+import type { TRPCRouterRecord } from "@trpc/server"
+import { TRPCError } from "@trpc/server"
 
 import { publicProcedure } from "../init"
 import { db } from "#/db"
