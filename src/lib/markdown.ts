@@ -1,6 +1,6 @@
 import { Marked } from "marked"
 import markedShiki from "marked-shiki"
-import { createHighlighter } from "shiki"
+import { createHighlighter, createJavaScriptRegexEngine } from "shiki"
 import type { Highlighter } from "shiki"
 
 const LANGUAGES = [
@@ -29,6 +29,7 @@ function getHighlighter() {
 		highlighterPromise = createHighlighter({
 			themes: ["github-light", "github-dark"],
 			langs: [...LANGUAGES],
+			engine: createJavaScriptRegexEngine(),
 		})
 	}
 	return highlighterPromise
