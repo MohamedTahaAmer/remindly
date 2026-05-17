@@ -67,7 +67,7 @@ let updated = 0
 for (const c of seeds) {
 	const [existing] = await db.select({ id: cards.id }).from(cards).where(eq(cards.front, c.front)).limit(1)
 
-	if (existing.id) {
+	if (existing?.id) {
 		await db.update(cards).set({ back: c.back, detailsMarkdown: c.detailsMarkdown }).where(eq(cards.id, existing.id))
 		console.log(`Updated card #${existing.id}: ${c.front}`)
 		updated++
