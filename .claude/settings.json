@@ -15,10 +15,6 @@
 					{
 						"type": "command",
 						"command": ".claude/hooks/block-mysql-writes.sh"
-					},
-					{
-						"type": "command",
-						"command": ".claude/hooks/block-claude-coauthor.sh"
 					}
 				]
 			}
