@@ -73,7 +73,7 @@ function EditCard() {
 			<header className="flex items-end justify-between gap-4 shrink-0 border-b border-border pb-5">
 				<div>
 					<div className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-mono">Revising № {card.id}</div>
-					<h1 className="font-serif text-3xl tracking-tight mt-1" style={{ fontVariationSettings: '"opsz" 144' }}>
+					<h1 className="font-serif text-3xl tracking-tight mt-1">
 						Edit card<span className="text-sage italic font-normal">.</span>
 					</h1>
 				</div>
@@ -104,7 +104,6 @@ function EditCard() {
 							onChange={(e) => setFront(e.target.value)}
 							required
 							className={`${fieldBase} font-serif text-2xl leading-snug`}
-							style={{ fontVariationSettings: '"opsz" 144' }}
 						/>
 					</label>
 
@@ -178,7 +177,6 @@ function EditCard() {
 							<div className="absolute -left-2 top-0 w-3 h-3 rounded-full bg-sage" />
 							<h2
 								className="font-serif text-4xl leading-[1.1] tracking-tight [overflow-wrap:anywhere] [&_code]:bg-muted [&_code]:px-2 [&_code]:py-0.5 [&_code]:rounded [&_code]:font-mono [&_code]:text-[0.85em]"
-								style={{ fontVariationSettings: '"opsz" 144' }}
 								dangerouslySetInnerHTML={{ __html: parseInlineMarkdown(front || " ") }}
 							/>
 						</div>

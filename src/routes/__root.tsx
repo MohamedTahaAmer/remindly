@@ -21,6 +21,12 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 	head: () => ({
 		meta: [{ charSet: "utf-8" }, { name: "viewport", content: "width=device-width, initial-scale=1" }, { title: "Remindly" }],
 		links: [
+			{ rel: "preconnect", href: "https://fonts.googleapis.com" },
+			{ rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+			{
+				rel: "stylesheet",
+				href: "https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap",
+			},
 			{ rel: "stylesheet", href: appCss },
 			{ rel: "icon", type: "image/svg+xml", href: "/logo.svg" },
 		],
@@ -38,8 +44,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			<body className="min-h-screen bg-background text-foreground antialiased">
 				<nav className="border-b border-border bg-background/80 backdrop-blur sticky top-0 z-10">
 					<div className="max-w-6xl mx-auto px-6 py-3 flex items-center gap-6">
-						<Link to="/" className="font-semibold text-lg text-foreground">
-							<span className="text-sage">Remind</span>ly
+						<Link to="/" className="font-serif text-2xl tracking-tight text-foreground leading-none">
+							<span className="text-sage italic">Remind</span>ly
 						</Link>
 						<div className="flex gap-4 text-sm text-muted-foreground">
 							<Link to="/" activeProps={{ className: "text-foreground" }} activeOptions={{ exact: true }}>

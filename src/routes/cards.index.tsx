@@ -60,7 +60,7 @@ function CardsList() {
 			<header className="flex items-end justify-between gap-4 border-b border-border pb-6">
 				<div>
 					<div className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-mono">The index</div>
-					<h1 className="font-serif text-5xl tracking-tight mt-1" style={{ fontVariationSettings: '"opsz" 144' }}>
+					<h1 className="font-serif text-5xl tracking-tight mt-1">
 						All cards
 						<span className="text-sage italic font-normal">.</span>
 					</h1>

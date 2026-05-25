@@ -32,7 +32,7 @@ function NewCard() {
 		<form onSubmit={submit} className="max-w-2xl mx-auto space-y-10">
 			<header className="border-b border-border pb-6">
 				<div className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-mono">A new entry</div>
-				<h1 className="font-serif text-4xl tracking-tight mt-1" style={{ fontVariationSettings: '"opsz" 144' }}>
+				<h1 className="font-serif text-4xl tracking-tight mt-1">
 					New card<span className="text-sage italic font-normal">.</span>
 				</h1>
 			</header>
@@ -45,7 +45,6 @@ function NewCard() {
 					autoFocus
 					placeholder="Write the question…"
 					className={`${fieldBase} font-serif text-2xl leading-snug`}
-					style={{ fontVariationSettings: '"opsz" 144' }}
 				/>
 			</Field>
 

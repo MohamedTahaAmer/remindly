@@ -35,7 +35,7 @@ function CardDetail() {
 				<div className="absolute -left-2 top-0 w-3 h-3 rounded-full bg-sage" />
 				<h1
 					className="font-serif text-4xl md:text-5xl leading-[1.1] tracking-tight [overflow-wrap:anywhere] [&_code]:bg-muted [&_code]:px-2 [&_code]:py-0.5 [&_code]:rounded [&_code]:font-mono [&_code]:text-[0.85em]"
-					style={{ viewTransitionName: `card-title-${card.id}`, fontVariationSettings: '"opsz" 144' }}
+					style={{ viewTransitionName: `card-title-${card.id}` }}
 					dangerouslySetInnerHTML={{ __html: parseInlineMarkdown(card.front) }}
 				/>
 			</div>
