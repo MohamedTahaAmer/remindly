@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { useQuery } from "@tanstack/react-query"
+import { useSuspenseQuery } from "@tanstack/react-query"
 import { useTRPC } from "#/integrations/trpc/react"
 import { parseInlineMarkdown, parseMarkdown } from "#/lib/markdown"
 
@@ -16,10 +16,7 @@ function CardDetail() {
 	const { id } = Route.useParams()
 	const { detailsHtml } = Route.useLoaderData()
 	const trpc = useTRPC()
-	const { data: card, isLoading } = useQuery(trpc.cards.get.queryOptions({ id: Number(id) }))
-
-	if (isLoading) return <div className="text-muted-foreground">Loading…</div>
-	if (!card) return <div className="text-muted-foreground">Not found</div>
+	const { data: card } = useSuspenseQuery(trpc.cards.get.queryOptions({ id: Number(id) }))
 
 	return (
 		<article className="space-y-6 max-w-3xl">
