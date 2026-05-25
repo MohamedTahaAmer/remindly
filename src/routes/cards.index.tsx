@@ -26,7 +26,7 @@ function CardsList() {
 
 			<ul className="divide-y divide-border rounded-xl border border-border bg-card">
 				{data?.map((c) => (
-					<li key={c.id} className="p-4 flex items-center justify-between gap-4">
+					<li key={c.id} className="p-4 flex items-center justify-between gap-4 [content-visibility:auto] [contain-intrinsic-size:auto_4rem]">
 						<div className="min-w-0">
 							<div className="truncate font-medium">{c.front}</div>
 							<div className="text-xs text-muted-foreground mt-1">
