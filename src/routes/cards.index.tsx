@@ -28,14 +28,16 @@ function CardsList() {
 				{data?.map((c) => (
 					<li key={c.id} className="p-4 flex items-center justify-between gap-4 [content-visibility:auto] [contain-intrinsic-size:auto_4rem]">
 						<div className="min-w-0">
-							<div className="truncate font-medium">{c.front}</div>
+							<div className="truncate font-medium" style={{ viewTransitionName: `card-title-${c.id}` }}>
+								{c.front}
+							</div>
 							<div className="text-xs text-muted-foreground mt-1">
 								Step {c.intervalIndex} · due {new Date(c.scheduledFor).toLocaleDateString()}
 							</div>
 						</div>
 						<div className="flex gap-3 text-sm shrink-0">
 							{c.detailsMarkdown && (
-								<Link to="/cards/$id" params={{ id: String(c.id) }} className="text-sage hover:underline">
+								<Link to="/cards/$id" params={{ id: String(c.id) }} viewTransition className="text-sage hover:underline">
 									View
 								</Link>
 							)}

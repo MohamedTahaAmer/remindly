@@ -24,6 +24,7 @@ function CardDetail() {
 				<div>
 					<h1
 						className="text-3xl font-semibold tracking-tight [overflow-wrap:anywhere] [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:font-mono [&_code]:text-[0.9em]"
+						style={{ viewTransitionName: `card-title-${card.id}` }}
 						dangerouslySetInnerHTML={{ __html: parseInlineMarkdown(card.front) }}
 					/>
 					<p className="text-muted-foreground mt-2 whitespace-pre-wrap">{card.back}</p>
