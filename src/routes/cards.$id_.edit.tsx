@@ -11,11 +11,8 @@ export const Route = createFileRoute("/cards/$id_/edit")({
 	},
 })
 
-const fieldClass =
-	"w-full rounded-md bg-input border border-border px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sage field-sizing-content user-invalid:border-coral user-invalid:focus:ring-coral"
-
-const titleClass =
-	"text-3xl font-semibold tracking-tight [overflow-wrap:anywhere] [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:font-mono [&_code]:text-[0.9em]"
+const fieldBase =
+	"w-full bg-transparent border-0 border-b border-border focus:border-sage focus:outline-none focus:ring-0 px-0 py-2 text-foreground placeholder:text-muted-foreground/60 transition-colors field-sizing-content user-invalid:border-coral"
 
 function EditCard() {
 	const { id } = Route.useParams()
@@ -37,7 +34,6 @@ function EditCard() {
 		setDetails(card.detailsMarkdown ?? "")
 	}, [card])
 
-	// Debounced markdown -> html for the live preview.
 	useEffect(() => {
 		let cancelled = false
 		if (!details.trim()) {
@@ -64,7 +60,7 @@ function EditCard() {
 		onSuccess: () => router.navigate({ to: "/cards" }),
 	})
 
-	if (!card) return <div className="text-muted-foreground">Loading…</div>
+	if (!card) return <div className="text-muted-foreground italic font-serif">Loading…</div>
 
 	return (
 		<form
@@ -72,51 +68,77 @@ function EditCard() {
 				e.preventDefault()
 				update.mutate({ id: numId, front, back, detailsMarkdown: details.trim() || null })
 			}}
-			className="relative left-1/2 right-1/2 -mx-[50vw] w-screen px-10 h-[calc(100vh-8rem)] flex flex-col gap-4 overflow-hidden"
+			className="relative left-1/2 right-1/2 -mx-[50vw] w-screen px-10 min-h-[calc(100vh-8rem)] flex flex-col gap-8"
 		>
-			<div className="flex items-center justify-between gap-4 shrink-0">
-				<h1 className="text-2xl font-semibold tracking-tight">Edit card</h1>
-				<div className="flex gap-2">
+			<header className="flex items-end justify-between gap-4 shrink-0 border-b border-border pb-5">
+				<div>
+					<div className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-mono">Revising № {card.id}</div>
+					<h1 className="font-serif text-3xl tracking-tight mt-1" style={{ fontVariationSettings: '"opsz" 144' }}>
+						Edit card<span className="text-sage italic font-normal">.</span>
+					</h1>
+				</div>
+				<div className="flex items-center gap-2">
 					<button
 						type="button"
 						onClick={() => router.history.back()}
-						className="rounded-md border border-border hover:bg-muted px-4 py-2 text-foreground transition"
+						className="rounded-full px-5 py-2.5 text-sm text-muted-foreground hover:text-foreground transition"
 					>
 						Cancel
 					</button>
 					<button
-						type="button"
-						onClick={() => deleteDialogRef.current?.showModal()}
-						className="rounded-md border border-coral text-coral hover:bg-coral/10 px-4 py-2 transition"
-					>
-						Delete
-					</button>
-					<button
 						type="submit"
 						disabled={update.isPending}
-						className="rounded-md bg-sage hover:opacity-90 disabled:opacity-50 px-4 py-2 text-white font-medium transition"
+						className="rounded-full bg-sage hover:bg-sage/90 disabled:opacity-50 px-6 py-2.5 text-sm text-white font-medium transition shadow-sm shadow-sage/30"
 					>
-						{update.isPending ? "Saving…" : "Save"}
+						{update.isPending ? "Saving…" : "Save →"}
 					</button>
 				</div>
-			</div>
+			</header>
 
-			<div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 min-h-0">
-				<div className="space-y-4 overflow-y-auto pr-2 flex flex-col">
+			<div className="grid grid-cols-1 lg:grid-cols-2 gap-12 flex-1 min-h-0">
+				<div className="space-y-8 overflow-y-auto pr-2">
 					<label className="block">
-						<div className="text-sm text-muted-foreground mb-1.5">Title (front, markdown)</div>
-						<input value={front} onChange={(e) => setFront(e.target.value)} required className={fieldClass} />
+						<div className="text-[11px] uppercase tracking-[0.2em] font-mono text-muted-foreground mb-2">The prompt</div>
+						<input
+							value={front}
+							onChange={(e) => setFront(e.target.value)}
+							required
+							className={`${fieldBase} font-serif text-2xl leading-snug`}
+							style={{ fontVariationSettings: '"opsz" 144' }}
+						/>
 					</label>
 
 					<label className="block">
-						<div className="text-sm text-muted-foreground mb-1.5">Back</div>
-						<textarea value={back} onChange={(e) => setBack(e.target.value)} required rows={4} className={fieldClass} />
+						<div className="text-[11px] uppercase tracking-[0.2em] font-mono text-muted-foreground mb-2">The answer</div>
+						<textarea
+							value={back}
+							onChange={(e) => setBack(e.target.value)}
+							required
+							rows={3}
+							className={`${fieldBase} font-serif text-lg`}
+						/>
 					</label>
 
-					<label className="flex flex-col flex-1 min-h-0">
-						<div className="text-sm text-muted-foreground mb-1.5">Details (markdown)</div>
-						<textarea value={details} onChange={(e) => setDetails(e.target.value)} className={`${fieldClass} font-mono text-sm flex-1 resize-none`} />
+					<label className="block">
+						<div className="text-[11px] uppercase tracking-[0.2em] font-mono text-muted-foreground mb-2">The lesson</div>
+						<textarea value={details} onChange={(e) => setDetails(e.target.value)} rows={16} className={`${fieldBase} font-mono text-sm`} />
 					</label>
+
+					<section className="mt-12 pt-6 border-t border-coral/30">
+						<div className="text-[11px] uppercase tracking-[0.2em] font-mono text-coral mb-2">Danger zone</div>
+						<div className="flex items-center justify-between gap-4">
+							<p className="text-sm text-muted-foreground italic font-serif">
+								Removes this card and its full review history. There is no undo.
+							</p>
+							<button
+								type="button"
+								onClick={() => deleteDialogRef.current?.showModal()}
+								className="shrink-0 rounded-full border border-coral text-coral hover:bg-coral hover:text-white px-4 py-2 text-sm transition"
+							>
+								Delete card
+							</button>
+						</div>
+					</section>
 				</div>
 
 				<dialog
@@ -124,13 +146,13 @@ function EditCard() {
 					{...{ closedby: "any" }}
 					className="m-auto rounded-xl border border-border bg-card text-foreground p-6 max-w-sm shadow-xl backdrop:bg-black/40"
 				>
-					<h2 className="text-lg font-semibold">Delete this card?</h2>
-					<p className="text-sm text-muted-foreground mt-2">This will remove the card and its review history.</p>
+					<h2 className="font-serif text-2xl">Delete this card?</h2>
+					<p className="text-sm text-muted-foreground mt-2 italic font-serif">This will remove the card and its review history.</p>
 					<div className="flex justify-end gap-2 mt-5">
 						<button
 							type="button"
 							onClick={() => deleteDialogRef.current?.close()}
-							className="rounded-md border border-border hover:bg-muted px-3 py-1.5 text-sm transition"
+							className="rounded-full px-4 py-1.5 text-sm text-muted-foreground hover:text-foreground transition"
 						>
 							Cancel
 						</button>
@@ -140,25 +162,40 @@ function EditCard() {
 								deleteDialogRef.current?.close()
 								del.mutate({ id: numId })
 							}}
-							className="rounded-md bg-coral hover:opacity-90 px-3 py-1.5 text-sm font-medium text-white transition"
+							className="rounded-full bg-coral hover:opacity-90 px-4 py-1.5 text-sm font-medium text-white transition"
 						>
 							Delete
 						</button>
 					</div>
 				</dialog>
 
-				<div className="overflow-y-auto rounded-xl border border-border bg-card p-6 space-y-6">
-					<div className="text-[10px] uppercase tracking-wider text-muted-foreground">Preview</div>
-					<div>
-						<h2 className={titleClass} dangerouslySetInnerHTML={{ __html: parseInlineMarkdown(front || " ") }} />
-						<p className="text-muted-foreground mt-2 whitespace-pre-wrap">{back}</p>
+				<aside className="overflow-y-auto">
+					<div className="sticky top-0 -mt-2 pt-2 pb-3 bg-background/80 backdrop-blur z-[1]">
+						<div className="text-[11px] uppercase tracking-[0.2em] font-mono text-muted-foreground">Live preview · how the page will read</div>
 					</div>
-					{detailsHtml ? (
-						<div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: detailsHtml }} />
-					) : (
-						<div className="text-muted-foreground text-sm">No details.</div>
-					)}
-				</div>
+					<article className="max-w-2xl">
+						<div className="relative pl-8 border-l-2 border-sage/40 mb-10">
+							<div className="absolute -left-2 top-0 w-3 h-3 rounded-full bg-sage" />
+							<h2
+								className="font-serif text-4xl leading-[1.1] tracking-tight [overflow-wrap:anywhere] [&_code]:bg-muted [&_code]:px-2 [&_code]:py-0.5 [&_code]:rounded [&_code]:font-mono [&_code]:text-[0.85em]"
+								style={{ fontVariationSettings: '"opsz" 144' }}
+								dangerouslySetInnerHTML={{ __html: parseInlineMarkdown(front || " ") }}
+							/>
+						</div>
+						<div className="mb-10">
+							<div className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground mb-3">Answer</div>
+							<p className="font-serif text-xl leading-relaxed whitespace-pre-wrap [overflow-wrap:anywhere]">{back}</p>
+						</div>
+						{detailsHtml ? (
+							<section className="border-t border-border pt-8">
+								<div className="text-[11px] font-mono uppercase tracking-[0.2em] text-muted-foreground mb-4">The lesson</div>
+								<div className="prose prose-lg max-w-none" dangerouslySetInnerHTML={{ __html: detailsHtml }} />
+							</section>
+						) : (
+							<div className="border-t border-border pt-8 text-muted-foreground italic font-serif text-sm">No further notes for this card.</div>
+						)}
+					</article>
+				</aside>
 			</div>
 		</form>
 	)
