@@ -1,6 +1,6 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router"
 import { useMutation, useQuery } from "@tanstack/react-query"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useTRPC } from "#/integrations/trpc/react"
 import { parseInlineMarkdown, parseMarkdown } from "#/lib/markdown"
 
@@ -28,6 +28,7 @@ function EditCard() {
 	const [back, setBack] = useState("")
 	const [details, setDetails] = useState("")
 	const [detailsHtml, setDetailsHtml] = useState("")
+	const deleteDialogRef = useRef<HTMLDialogElement>(null)
 
 	useEffect(() => {
 		if (!card) return
@@ -85,9 +86,7 @@ function EditCard() {
 					</button>
 					<button
 						type="button"
-						onClick={() => {
-							if (confirm("Delete this card?")) del.mutate({ id: numId })
-						}}
+						onClick={() => deleteDialogRef.current?.showModal()}
 						className="rounded-md border border-coral text-coral hover:bg-coral/10 px-4 py-2 transition"
 					>
 						Delete
@@ -119,6 +118,34 @@ function EditCard() {
 						<textarea value={details} onChange={(e) => setDetails(e.target.value)} className={`${fieldClass} font-mono text-sm flex-1 resize-none`} />
 					</label>
 				</div>
+
+				<dialog
+					ref={deleteDialogRef}
+					{...{ closedby: "any" }}
+					className="m-auto rounded-xl border border-border bg-card text-foreground p-6 max-w-sm shadow-xl backdrop:bg-black/40"
+				>
+					<h2 className="text-lg font-semibold">Delete this card?</h2>
+					<p className="text-sm text-muted-foreground mt-2">This will remove the card and its review history.</p>
+					<div className="flex justify-end gap-2 mt-5">
+						<button
+							type="button"
+							onClick={() => deleteDialogRef.current?.close()}
+							className="rounded-md border border-border hover:bg-muted px-3 py-1.5 text-sm transition"
+						>
+							Cancel
+						</button>
+						<button
+							type="button"
+							onClick={() => {
+								deleteDialogRef.current?.close()
+								del.mutate({ id: numId })
+							}}
+							className="rounded-md bg-coral hover:opacity-90 px-3 py-1.5 text-sm font-medium text-white transition"
+						>
+							Delete
+						</button>
+					</div>
+				</dialog>
 
 				<div className="overflow-y-auto rounded-xl border border-border bg-card p-6 space-y-6">
 					<div className="text-[10px] uppercase tracking-wider text-muted-foreground">Preview</div>
