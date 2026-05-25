@@ -8,7 +8,7 @@ export const Route = createFileRoute("/cards/new")({
 })
 
 const fieldClass =
-	"w-full rounded-md bg-input border border-border px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sage field-sizing-content max-h-[60vh]"
+	"w-full rounded-md bg-input border border-border px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sage field-sizing-content max-h-[60vh] user-invalid:border-coral user-invalid:focus:ring-coral"
 
 function NewCard() {
 	const trpc = useTRPC()
