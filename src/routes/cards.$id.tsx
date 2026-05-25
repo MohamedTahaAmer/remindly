@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { useSuspenseQuery } from "@tanstack/react-query"
+import { useState } from "react"
 import { useTRPC } from "#/integrations/trpc/react"
 import { parseInlineMarkdown, parseMarkdown } from "#/lib/markdown"
 
@@ -17,30 +18,57 @@ function CardDetail() {
 	const { detailsHtml } = Route.useLoaderData()
 	const trpc = useTRPC()
 	const { data: card } = useSuspenseQuery(trpc.cards.get.queryOptions({ id: Number(id) }))
+	const [revealed, setRevealed] = useState(false)
 
 	return (
-		<article className="space-y-6 max-w-3xl">
-			<header className="flex items-start justify-between gap-4">
-				<div>
-					<h1
-						className="text-3xl font-semibold tracking-tight [overflow-wrap:anywhere] [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:font-mono [&_code]:text-[0.9em]"
-						style={{ viewTransitionName: `card-title-${card.id}` }}
-						dangerouslySetInnerHTML={{ __html: parseInlineMarkdown(card.front) }}
-					/>
-					<p className="text-muted-foreground mt-2 whitespace-pre-wrap">{card.back}</p>
-				</div>
-				<Link to="/cards/$id/edit" params={{ id }} className="text-sm text-muted-foreground hover:text-foreground shrink-0">
-					Edit
+		<article className="max-w-3xl mx-auto">
+			<header className="flex items-center justify-between mb-12">
+				<Link to="/cards" className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors">
+					← The index
 				</Link>
+				<div className="text-[11px] font-mono uppercase tracking-[0.2em] text-muted-foreground">
+					Step <span className="text-sage">{card.intervalIndex}</span> · scheduled {new Date(card.scheduledFor).toLocaleDateString()}
+				</div>
 			</header>
 
-			{detailsHtml ? (
-				<div className="rounded-xl border border-border bg-card p-6">
-					<div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: detailsHtml }} />
+			<div className="relative pl-8 border-l-2 border-sage/40 mb-12">
+				<div className="absolute -left-2 top-0 w-3 h-3 rounded-full bg-sage" />
+				<h1
+					className="font-serif text-4xl md:text-5xl leading-[1.1] tracking-tight [overflow-wrap:anywhere] [&_code]:bg-muted [&_code]:px-2 [&_code]:py-0.5 [&_code]:rounded [&_code]:font-mono [&_code]:text-[0.85em]"
+					style={{ viewTransitionName: `card-title-${card.id}`, fontVariationSettings: '"opsz" 144' }}
+					dangerouslySetInnerHTML={{ __html: parseInlineMarkdown(card.front) }}
+				/>
+			</div>
+
+			<details
+				open={revealed}
+				onToggle={(e) => setRevealed((e.target as HTMLDetailsElement).open)}
+				className="group mb-14 [&_summary::-webkit-details-marker]:hidden"
+			>
+				<summary className="cursor-pointer select-none flex items-center gap-3 text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors">
+					<span className="inline-block w-6 border-t border-current" />
+					<span>{revealed ? "Hide answer" : "Reveal answer"}</span>
+				</summary>
+				<div className="mt-6 font-serif text-xl leading-relaxed text-foreground whitespace-pre-wrap [overflow-wrap:anywhere]">
+					{card.back}
 				</div>
+			</details>
+
+			{detailsHtml ? (
+				<section className="border-t border-border pt-10">
+					<div className="text-[11px] font-mono uppercase tracking-[0.2em] text-muted-foreground mb-6">The lesson</div>
+					<div className="prose prose-lg max-w-none" dangerouslySetInnerHTML={{ __html: detailsHtml }} />
+				</section>
 			) : (
-				<div className="text-muted-foreground text-sm">No details for this card.</div>
+				<div className="border-t border-border pt-10 text-muted-foreground italic font-serif text-sm">No further notes for this card.</div>
 			)}
+
+			<footer className="mt-16 pt-6 border-t border-border flex items-center justify-between text-xs font-mono uppercase tracking-[0.2em]">
+				<Link to="/cards/$id/edit" params={{ id }} className="text-muted-foreground hover:text-foreground transition-colors">
+					Edit ↗
+				</Link>
+				<span className="text-muted-foreground/60">№ {card.id}</span>
+			</footer>
 		</article>
 	)
 }
