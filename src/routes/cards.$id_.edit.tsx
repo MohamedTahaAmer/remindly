@@ -2,7 +2,7 @@ import { createFileRoute, useRouter } from "@tanstack/react-router"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { useEffect, useRef, useState } from "react"
 import { useTRPC } from "#/integrations/trpc/react"
-import { parseInlineMarkdown, parseMarkdown } from "#/lib/markdown"
+import { parseBlockMarkdown, parseInlineMarkdown, parseMarkdown } from "#/lib/markdown"
 
 export const Route = createFileRoute("/cards/$id_/edit")({
 	component: EditCard,
@@ -169,7 +169,10 @@ function EditCard() {
 						</div>
 						<div className="mb-10">
 							<div className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground mb-3">Answer</div>
-							<p className="font-serif text-xl leading-relaxed whitespace-pre-wrap [overflow-wrap:anywhere]">{back}</p>
+							<div
+								className="prose prose-xl max-w-none font-serif [overflow-wrap:anywhere]"
+								dangerouslySetInnerHTML={{ __html: parseBlockMarkdown(back) }}
+							/>
 						</div>
 						{detailsHtml ? (
 							<section className="border-t border-border pt-8">
