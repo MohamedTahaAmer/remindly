@@ -59,3 +59,9 @@ const inlineMarked = new Marked()
 export function parseInlineMarkdown(md: string): string {
 	return inlineMarked.parseInline(md, { async: false })
 }
+
+// Synchronous block-level parse, no shiki — used for the card back, which
+// can hold paragraphs and inline formatting but no highlighted code fences.
+export function parseBlockMarkdown(md: string): string {
+	return inlineMarked.parse(md, { async: false })
+}

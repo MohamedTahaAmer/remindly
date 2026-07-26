@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query"
 import { Dialog } from "radix-ui"
 import { X } from "lucide-react"
 import { useTRPC } from "#/integrations/trpc/react"
-import { parseInlineMarkdown } from "#/lib/markdown"
+import { parseBlockMarkdown, parseInlineMarkdown } from "#/lib/markdown"
 import { intervalDaysFor, nextIntervalIndex } from "#/lib/schedule"
 import type { ReviewRating } from "#/db/schema"
 
@@ -67,7 +67,7 @@ export function CardModal({ card, open, onOpenChange }: { card: Card; open: bool
 					<div className="flex-1 overflow-y-auto p-6 space-y-6">
 						<section>
 							<div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">Answer</div>
-							<p className="whitespace-pre-wrap [overflow-wrap:anywhere]">{card.back}</p>
+							<div className="prose max-w-none [overflow-wrap:anywhere]" dangerouslySetInnerHTML={{ __html: parseBlockMarkdown(card.back) }} />
 						</section>
 
 						{card.detailsMarkdown && (

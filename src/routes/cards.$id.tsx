@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router"
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { useState } from "react"
 import { useTRPC } from "#/integrations/trpc/react"
-import { parseInlineMarkdown, parseMarkdown } from "#/lib/markdown"
+import { parseBlockMarkdown, parseInlineMarkdown, parseMarkdown } from "#/lib/markdown"
 
 export const Route = createFileRoute("/cards/$id")({
 	component: CardDetail,
@@ -49,7 +49,10 @@ function CardDetail() {
 					<span className="inline-block w-6 border-t border-current" />
 					<span>{revealed ? "Hide answer" : "Reveal answer"}</span>
 				</summary>
-				<div className="mt-6 font-serif text-xl leading-relaxed text-foreground whitespace-pre-wrap [overflow-wrap:anywhere]">{card.back}</div>
+				<div
+					className="mt-6 prose prose-xl max-w-none font-serif [overflow-wrap:anywhere]"
+					dangerouslySetInnerHTML={{ __html: parseBlockMarkdown(card.back) }}
+				/>
 			</details>
 
 			{detailsHtml ? (
