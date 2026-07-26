@@ -4,7 +4,7 @@
 
 **The solution in TypeScript:** grafting a mixin onto a class means updating it on two layers that must stay in sync — there's no native `mixin` keyword to do it for you.
 
-1. **Update the type.** This is the easy half. Declare an `interface` with the **same name as the base class** and have it `extends` the mixins. TypeScript lets interfaces grow — a same-named `interface` and `class` are merged (*declaration merging*), so the base type now also reports the mixins' members to the type checker.
+1. **Update the type.** This is the easy half. Declare an `interface` with the **same name as the base class** and have it `extends` the mixins. TypeScript lets interfaces grow — a same-named `interface` and `class` are merged (_declaration merging_), so the base type now also reports the mixins' members to the type checker.
 2. **Update the runtime behavior.** This is the hard half. JS has no concept of mixins, and TypeScript ships no polyfill, so you do it by hand: copy each mixin's prototype methods onto the base class with a small `applyMixins` helper.
 
 So you write each mixin as a plain ES class, then satisfy both layers separately: the `interface` satisfies the type checker, and `applyMixins` satisfies the JS engine. Do only one and they fall out of sync — code that compiles but crashes, or runs but won't type-check.

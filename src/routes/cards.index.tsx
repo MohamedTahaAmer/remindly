@@ -65,10 +65,7 @@ function CardsList() {
 						<span className="text-sage italic font-normal">.</span>
 					</h1>
 				</div>
-				<Link
-					to="/cards/new"
-					className="rounded-full bg-sage hover:bg-sage/90 px-5 py-2.5 text-sm font-medium text-white transition shadow-sm shadow-sage/30"
-				>
+				<Link to="/cards/new" className="rounded-full bg-sage hover:bg-sage/90 px-5 py-2.5 text-sm font-medium text-white transition shadow-sm shadow-sage/30">
 					New card →
 				</Link>
 			</header>
@@ -116,12 +113,7 @@ function CardsList() {
 									</div>
 									<div className="flex gap-4 text-xs font-mono uppercase tracking-wider shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
 										{c.detailsMarkdown && (
-											<Link
-												to="/cards/$id"
-												params={{ id: String(c.id) }}
-												viewTransition
-												className="text-sage hover:underline underline-offset-4"
-											>
+											<Link to="/cards/$id" params={{ id: String(c.id) }} viewTransition className="text-sage hover:underline underline-offset-4">
 												Read
 											</Link>
 										)}

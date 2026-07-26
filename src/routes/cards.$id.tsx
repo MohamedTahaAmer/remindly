@@ -49,9 +49,7 @@ function CardDetail() {
 					<span className="inline-block w-6 border-t border-current" />
 					<span>{revealed ? "Hide answer" : "Reveal answer"}</span>
 				</summary>
-				<div className="mt-6 font-serif text-xl leading-relaxed text-foreground whitespace-pre-wrap [overflow-wrap:anywhere]">
-					{card.back}
-				</div>
+				<div className="mt-6 font-serif text-xl leading-relaxed text-foreground whitespace-pre-wrap [overflow-wrap:anywhere]">{card.back}</div>
 			</details>
 
 			{detailsHtml ? (

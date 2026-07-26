@@ -8,7 +8,7 @@ Increasingly the work isn't typing code, it's building the **systems and guardra
 
 ## The shift
 
-The bottleneck has moved. An LLM can generate large volumes of plausible code quickly, but plausible ≠ correct, fast, safe, or maintainable. The valuable human (and tooling) contribution is no longer the keystrokes — it's the **guardrails that catch the difference** between code that looks right and code that *is* right.
+The bottleneck has moved. An LLM can generate large volumes of plausible code quickly, but plausible ≠ correct, fast, safe, or maintainable. The valuable human (and tooling) contribution is no longer the keystrokes — it's the **guardrails that catch the difference** between code that looks right and code that _is_ right.
 
 So the role shifts from author to **systems builder**: designing the tests, type contracts, linters, schema validation, code review, and CI gates that constrain what bad output can survive.
 
@@ -25,12 +25,12 @@ An LLM will happily produce code that nails one or two of these while quietly fa
 
 ## The guardrails, mapped
 
-| Goal        | Guardrail that enforces it                                  |
-| ----------- | ----------------------------------------------------------- |
-| Working     | Unit/integration tests, type system, CI must-pass gates     |
-| Performant  | Benchmarks, query/log analysis, profiling, load tests       |
-| Secure      | Static analysis, dependency scanning, security review, authz tests |
-| Readable    | Linters, formatters, code review, naming/structure conventions |
+| Goal       | Guardrail that enforces it                                         |
+| ---------- | ------------------------------------------------------------------ |
+| Working    | Unit/integration tests, type system, CI must-pass gates            |
+| Performant | Benchmarks, query/log analysis, profiling, load tests              |
+| Secure     | Static analysis, dependency scanning, security review, authz tests |
+| Readable   | Linters, formatters, code review, naming/structure conventions     |
 
 ## The principle
 

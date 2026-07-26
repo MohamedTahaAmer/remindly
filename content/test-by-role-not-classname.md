@@ -1,6 +1,6 @@
 # Why query by ARIA role instead of by class name or HTML tag in tests?
 
-The accessibility tree is the real contract of your UI; class names and tags are implementation details. A test that queries by role fails only when the *goal* of the code changes — not when you rename a class or swap a `<div>` for a `<section>`. Querying by role also forces you to write accessible HTML to make the test pass.
+The accessibility tree is the real contract of your UI; class names and tags are implementation details. A test that queries by role fails only when the _goal_ of the code changes — not when you rename a class or swap a `<div>` for a `<section>`. Querying by role also forces you to write accessible HTML to make the test pass.
 
 ---
 
@@ -27,7 +27,7 @@ A test should fail when the **goal** of the code changes, not when its **impleme
 
 ## The bonus: accessibility for free
 
-To query `getByRole("textbox", { name: "Email" })`, the input *must* be reachable in the accessibility tree with that label. So writing role-based tests pressures you into producing accessible HTML — the test and the screen-reader user want the same thing.
+To query `getByRole("textbox", { name: "Email" })`, the input _must_ be reachable in the accessibility tree with that label. So writing role-based tests pressures you into producing accessible HTML — the test and the screen-reader user want the same thing.
 
 ## Rule of thumb
 

@@ -99,23 +99,12 @@ function EditCard() {
 				<div className="space-y-8 overflow-y-auto pr-2">
 					<label className="block">
 						<div className="text-[11px] uppercase tracking-[0.2em] font-mono text-muted-foreground mb-2">The prompt</div>
-						<input
-							value={front}
-							onChange={(e) => setFront(e.target.value)}
-							required
-							className={`${fieldBase} font-serif text-2xl leading-snug`}
-						/>
+						<input value={front} onChange={(e) => setFront(e.target.value)} required className={`${fieldBase} font-serif text-2xl leading-snug`} />
 					</label>
 
 					<label className="block">
 						<div className="text-[11px] uppercase tracking-[0.2em] font-mono text-muted-foreground mb-2">The answer</div>
-						<textarea
-							value={back}
-							onChange={(e) => setBack(e.target.value)}
-							required
-							rows={3}
-							className={`${fieldBase} font-serif text-lg`}
-						/>
+						<textarea value={back} onChange={(e) => setBack(e.target.value)} required rows={3} className={`${fieldBase} font-serif text-lg`} />
 					</label>
 
 					<label className="block">
@@ -126,9 +115,7 @@ function EditCard() {
 					<section className="mt-12 pt-6 border-t border-coral/30">
 						<div className="text-[11px] uppercase tracking-[0.2em] font-mono text-coral mb-2">Danger zone</div>
 						<div className="flex items-center justify-between gap-4">
-							<p className="text-sm text-muted-foreground italic font-serif">
-								Removes this card and its full review history. There is no undo.
-							</p>
+							<p className="text-sm text-muted-foreground italic font-serif">Removes this card and its full review history. There is no undo.</p>
 							<button
 								type="button"
 								onClick={() => deleteDialogRef.current?.showModal()}
