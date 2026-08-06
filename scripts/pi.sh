@@ -35,8 +35,13 @@ BASE_URL="${BASE_URL:-http://192.99.45.15:3333}"
 tmp="$(mktemp)"
 trap 'rm -f "$tmp"' EXIT
 
+# On stdin, only the first bytes are read up front — enough to sniff the type
+# and announce the URL — and the rest is drained after, so the clipboard gets
+# the URL while the image is still streaming in over ssh.
+stream_rest=0
 if [ ! -t 0 ]; then
-	cat > "$tmp"
+	head -c 512 > "$tmp"
+	stream_rest=1
 elif command -v wl-paste > /dev/null 2>&1 && wl-paste -t image/png > "$tmp" 2>/dev/null; then
 	:
 elif command -v xclip > /dev/null 2>&1 && xclip -selection clipboard -t image/png -o > "$tmp" 2>/dev/null; then
@@ -69,19 +74,23 @@ esac
 
 rand="$(od -An -N3 -tx1 /dev/urandom | tr -d ' \n')"
 name="img-$(date +%Y%m%d-%H%M%S)-$rand.$ext"
-mkdir -p "$PHOTOS_DIR"
-cp "$tmp" "$PHOTOS_DIR/$name"
-chmod 644 "$PHOTOS_DIR/$name"
-
 url="${BASE_URL%/}/pasted-images/$name"
 
-# OSC 52: ask the terminal on the other end of ssh to set its clipboard.
-# Sent to stderr so stdout stays clean for piping (e.g. `| clip.exe`).
+# Announce the URL before the transfer finishes. OSC 52 (stderr) asks the
+# terminal on the PC to set its clipboard the moment the escape arrives;
+# stdout stays clean for piping (e.g. `| wl-copy`).
 b64="$(printf %s "$url" | base64 | tr -d '\n')"
 if [ -n "${TMUX:-}" ]; then
 	printf '\033Ptmux;\033\033]52;c;%s\a\033\\' "$b64" >&2
 else
 	printf '\033]52;c;%s\a' "$b64" >&2
 fi
-
 echo "$url"
+
+if [ "$stream_rest" = 1 ]; then
+	cat >> "$tmp"
+fi
+
+mkdir -p "$PHOTOS_DIR"
+cp "$tmp" "$PHOTOS_DIR/$name"
+chmod 644 "$PHOTOS_DIR/$name"

@@ -50,8 +50,18 @@ const middleware: Connect.NextHandleFunction = (req, res, next) => {
 				res.end(JSON.stringify({ error: "expected a non-empty image body" }))
 				return
 			}
-			const stamp = new Date().toISOString().replace(/[-:]/g, "").replace("T", "-").slice(0, 15)
-			const name = `img-${stamp}-${Math.random().toString(36).slice(2, 8)}.${ext}`
+			// callers may pre-pick the name (?name=) so they can hand out the URL
+			// before the upload finishes; shape is locked to our own naming scheme
+			let name = url.searchParams.get("name")
+			if (name !== null && (!/^img-\d{8}-\d{6}-[a-z0-9]{1,16}\.[a-z0-9]{2,5}$/.test(name) || !name.endsWith(`.${ext}`))) {
+				res.statusCode = 400
+				res.end(JSON.stringify({ error: "invalid name" }))
+				return
+			}
+			if (name === null) {
+				const stamp = new Date().toISOString().replace(/[-:]/g, "").replace("T", "-").slice(0, 15)
+				name = `img-${stamp}-${Math.random().toString(36).slice(2, 8)}.${ext}`
+			}
 			fs.mkdirSync(DIR, { recursive: true })
 			fs.writeFileSync(path.join(DIR, name), body)
 			res.setHeader("content-type", "application/json")
