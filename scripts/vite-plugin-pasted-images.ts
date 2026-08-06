@@ -60,6 +60,20 @@ const middleware: Connect.NextHandleFunction = (req, res, next) => {
 		return
 	}
 
+	if (url.pathname.startsWith("/pasted-images/") && req.method === "DELETE") {
+		const name = decodeURIComponent(url.pathname.slice("/pasted-images/".length))
+		const file = path.join(DIR, name)
+		if (name.includes("/") || name.includes("..") || !fs.existsSync(file)) {
+			res.statusCode = 404
+			res.end("not found")
+			return
+		}
+		fs.unlinkSync(file)
+		res.setHeader("content-type", "application/json")
+		res.end(JSON.stringify({ ok: true }))
+		return
+	}
+
 	if (url.pathname.startsWith("/pasted-images/") && req.method === "GET") {
 		const name = decodeURIComponent(url.pathname.slice("/pasted-images/".length))
 		const file = path.join(DIR, name)

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
-import { Check, Copy } from "lucide-react"
+import { Check, Copy, Trash2 } from "lucide-react"
 import { env } from "#/env"
 
 export const Route = createFileRoute("/pi")({
@@ -101,6 +101,11 @@ function PastePhotos() {
 		flashCopied(name)
 	}
 
+	async function deleteImage(name: string) {
+		const res = await fetch(`/pasted-images/${name}`, { method: "DELETE" })
+		if (res.ok) setImages((prev) => prev.filter((n) => n !== name))
+	}
+
 	return (
 		<div className="space-y-10">
 			<div
@@ -160,7 +165,15 @@ function PastePhotos() {
 										copied === name ? "opacity-100" : "opacity-0 group-hover:opacity-100"
 									}`}
 								>
-									{copied === name ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+									{copied === name ? <Check className="h-7 w-7" /> : <Copy className="h-7 w-7" />}
+								</button>
+								<button
+									type="button"
+									onClick={() => deleteImage(name)}
+									aria-label="Delete image"
+									className="absolute top-1 left-1 rounded-md bg-black/60 text-white p-1.5 transition hover:bg-red-600/90 opacity-0 group-hover:opacity-100"
+								>
+									<Trash2 className="h-7 w-7" />
 								</button>
 							</div>
 						))}
