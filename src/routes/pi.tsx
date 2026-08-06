@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
-import { Check, Copy, Trash2 } from "lucide-react"
+import { Check, Maximize2, Trash2 } from "lucide-react"
 import { env } from "#/env"
 
 export const Route = createFileRoute("/pi")({
@@ -27,73 +27,84 @@ function publicUrl(path: string) {
 	return `${base.replace(/\/$/, "")}${path}`
 }
 
-type Pending = { file: File; preview: string }
+const EXT_BY_MIME: Record<string, string> = {
+	"image/png": "png",
+	"image/jpeg": "jpg",
+	"image/gif": "gif",
+	"image/webp": "webp",
+	"image/svg+xml": "svg",
+	"image/avif": "avif",
+	"image/bmp": "bmp",
+}
+
+// name is generated client-side so the URL can be copied before the upload runs
+function makeName(type: string) {
+	const d = new Date()
+	const pad = (n: number) => String(n).padStart(2, "0")
+	const stamp = `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`
+	return `img-${stamp}-${Math.random().toString(36).slice(2, 8)}.${EXT_BY_MIME[type] ?? "png"}`
+}
 
 function PastePhotos() {
 	const [images, setImages] = useState<Array<string>>([])
-	const [pending, setPending] = useState<Array<Pending>>([])
-	const [uploading, setUploading] = useState(false)
+	const [status, setStatus] = useState<string | null>(null)
 	const [copied, setCopied] = useState<string | null>(null)
 	const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-	const pendingRef = useRef(pending)
-	pendingRef.current = pending
+	const statusTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
 	async function refresh() {
 		const res = await fetch("/api/pasted-images")
 		setImages(await res.json())
 	}
 
+	function flashStatus(text: string, ms = 3000) {
+		if (statusTimer.current) clearTimeout(statusTimer.current)
+		setStatus(text)
+		statusTimer.current = setTimeout(() => setStatus(null), ms)
+	}
+
 	useEffect(() => {
 		refresh()
-		return () => pendingRef.current.forEach((p) => URL.revokeObjectURL(p.preview))
+
+		// global watcher: Ctrl+V anywhere on the page uploads the clipboard image
+		async function onPaste(e: ClipboardEvent) {
+			const files = Array.from(e.clipboardData?.items ?? [])
+				.filter((item) => item.type.startsWith("image/"))
+				.map((item) => item.getAsFile())
+				.filter((f): f is File => f !== null)
+			if (files.length === 0) return
+			e.preventDefault()
+
+			const items = files.map((file) => ({ file, name: makeName(file.type) }))
+			// clipboard first — the URL is known up front; the upload runs after
+			await copyToClipboard(items.map((it) => publicUrl(`/pasted-images/${it.name}`)).join("\n"))
+			flashStatus("URL copied ✓ — uploading in background…", 60000)
+			try {
+				await Promise.all(
+					items.map(async (it) => {
+						const res = await fetch(`/api/pasted-images?name=${it.name}`, {
+							method: "POST",
+							headers: { "content-type": it.file.type },
+							body: it.file,
+						})
+						if (!res.ok) throw new Error(`upload failed: ${res.status}`)
+					}),
+				)
+				await refresh()
+				flashStatus("Uploaded ✓")
+			} catch {
+				flashStatus("Upload failed — the copied URL won't resolve", 8000)
+			}
+		}
+
+		document.addEventListener("paste", onPaste)
+		return () => document.removeEventListener("paste", onPaste)
 	}, [])
 
-	function flashCopied(label: string) {
+	function flashCopied(name: string) {
 		if (copiedTimer.current) clearTimeout(copiedTimer.current)
-		setCopied(label)
+		setCopied(name)
 		copiedTimer.current = setTimeout(() => setCopied(null), 1500)
-	}
-
-	function onPaste(e: React.ClipboardEvent) {
-		const files = Array.from(e.clipboardData.items)
-			.filter((item) => item.type.startsWith("image/"))
-			.map((item) => item.getAsFile())
-			.filter((f): f is File => f !== null)
-		if (files.length === 0) return
-		e.preventDefault()
-		setPending((prev) => [...prev, ...files.map((file) => ({ file, preview: URL.createObjectURL(file) }))])
-	}
-
-	async function upload() {
-		if (pending.length === 0 || uploading) return
-		setUploading(true)
-		try {
-			const urls: Array<string> = []
-			for (const p of pending) {
-				const res = await fetch("/api/pasted-images", {
-					method: "POST",
-					headers: { "content-type": p.file.type },
-					body: p.file,
-				})
-				if (!res.ok) throw new Error(`upload failed: ${res.status}`)
-				const { url } = (await res.json()) as { url: string }
-				urls.push(publicUrl(url))
-			}
-			await copyToClipboard(urls.join("\n"))
-			flashCopied("input")
-			pending.forEach((p) => URL.revokeObjectURL(p.preview))
-			setPending([])
-			await refresh()
-		} finally {
-			setUploading(false)
-		}
-	}
-
-	function onKeyDown(e: React.KeyboardEvent) {
-		if (e.key === "Enter" && !e.shiftKey) {
-			e.preventDefault()
-			upload()
-		}
 	}
 
 	async function copyImageUrl(name: string) {
@@ -107,79 +118,56 @@ function PastePhotos() {
 	}
 
 	return (
-		<div className="space-y-10">
-			<div
-				tabIndex={0}
-				onPaste={onPaste}
-				onKeyDown={onKeyDown}
-				className="rounded-full border border-border bg-background shadow-sm focus:outline-none focus:ring-2 focus:ring-sage/40 focus:border-sage transition cursor-text px-4 py-2 flex items-center gap-2"
-			>
-				{pending.map((p, i) => (
-					<div key={p.preview} className="relative group shrink-0">
-						<img src={p.preview} alt="" className="h-7 w-7 object-cover rounded border border-border" />
-						<button
-							type="button"
-							onClick={() => {
-								URL.revokeObjectURL(p.preview)
-								setPending((prev) => prev.filter((_, j) => j !== i))
-							}}
-							className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-foreground text-background text-[10px] leading-none opacity-0 group-hover:opacity-100 transition"
-							aria-label="Remove image"
-						>
-							×
-						</button>
-					</div>
-				))}
-				<div className="text-sm text-muted-foreground/70 select-none truncate">
-					{uploading
-						? "Uploading…"
-						: copied === "input"
-							? "Uploaded — URL copied to clipboard ✓"
-							: pending.length > 0
-								? "Press Enter to upload"
-								: "Click here, then Ctrl+V to paste an image from your clipboard…"}
-				</div>
+		<div className="space-y-8">
+			<div className="text-sm text-muted-foreground/70 select-none">
+				{status ?? "Ctrl+V anywhere on this page to upload the image from your clipboard."}
 			</div>
 
-			<section>
-				<div className="text-[11px] uppercase tracking-[0.2em] font-mono text-muted-foreground mb-4">Previously pasted</div>
-				{images.length === 0 ? (
-					<p className="text-sm text-muted-foreground/70 italic font-serif">Nothing here yet.</p>
-				) : (
-					<div className="grid grid-cols-8 gap-3">
-						{images.map((name) => (
-							<div key={name} className="relative group">
-								<a href={`/pasted-images/${name}`} target="_blank" rel="noreferrer" className="block">
-									<img
-										src={`/pasted-images/${name}`}
-										alt={name}
-										loading="lazy"
-										className="aspect-square w-full object-cover rounded-lg border border-border"
-									/>
-								</a>
-								<button
-									type="button"
-									onClick={() => copyImageUrl(name)}
-									aria-label="Copy URL"
-									className={`absolute top-1 right-1 rounded-md bg-black/60 text-white p-1.5 transition hover:bg-black/80 ${
-										copied === name ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-									}`}
-								>
-									{copied === name ? <Check className="h-7 w-7" /> : <Copy className="h-7 w-7" />}
-								</button>
-								<button
-									type="button"
-									onClick={() => deleteImage(name)}
-									aria-label="Delete image"
-									className="absolute top-1 left-1 rounded-md bg-black/60 text-white p-1.5 transition hover:bg-red-600/90 opacity-0 group-hover:opacity-100"
-								>
-									<Trash2 className="h-7 w-7" />
-								</button>
-							</div>
-						))}
-					</div>
-				)}
-			</section>
+			{images.length === 0 ? (
+				<p className="text-sm text-muted-foreground/70 italic font-serif">Nothing here yet.</p>
+			) : (
+				<div className="grid grid-cols-8 gap-3">
+					{images.map((name) => (
+						<div key={name} className="relative group">
+							<button
+								type="button"
+								onClick={() => copyImageUrl(name)}
+								aria-label="Copy URL"
+								className="block w-full cursor-pointer"
+							>
+								<img
+									src={`/pasted-images/${name}`}
+									alt={name}
+									loading="lazy"
+									className="aspect-square w-full object-cover rounded-lg border border-border"
+								/>
+							</button>
+							{copied === name && (
+								<div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/40 pointer-events-none">
+									<Check className="h-10 w-10 text-white" />
+								</div>
+							)}
+							<a
+								href={`/pasted-images/${name}`}
+								target="_blank"
+								rel="noreferrer"
+								aria-label="Open image in new tab"
+								className="absolute top-1 right-1 rounded-md bg-black/60 text-white p-1.5 transition hover:bg-black/80 opacity-0 group-hover:opacity-100"
+							>
+								<Maximize2 className="h-7 w-7" />
+							</a>
+							<button
+								type="button"
+								onClick={() => deleteImage(name)}
+								aria-label="Delete image"
+								className="absolute top-1 left-1 rounded-md bg-black/60 text-white p-1.5 transition hover:bg-red-600/90 opacity-0 group-hover:opacity-100"
+							>
+								<Trash2 className="h-7 w-7" />
+							</button>
+						</div>
+					))}
+				</div>
+			)}
 		</div>
 	)
 }
