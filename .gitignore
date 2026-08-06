@@ -3,6 +3,7 @@ node_modules
 dist
 dist-ssr
 *.local
+_local
 .env
 .nitro
 .tanstack

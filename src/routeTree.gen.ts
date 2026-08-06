@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PiRouteImport } from './routes/pi'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CardsIndexRouteImport } from './routes/cards.index'
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
@@ -20,6 +21,11 @@ import { Route as DemoFormAddressRouteImport } from './routes/demo/form.address'
 import { Route as CardsIdEditRouteImport } from './routes/cards.$id_.edit'
 import { Route as ApiTrpcSplatRouteImport } from './routes/api.trpc.$'
 
+const PiRoute = PiRouteImport.update({
+  id: '/pi',
+  path: '/pi',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -73,6 +79,7 @@ const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/pi': typeof PiRoute
   '/cards/$id': typeof CardsIdRoute
   '/cards/new': typeof CardsNewRoute
   '/demo/table': typeof DemoTableRoute
@@ -85,6 +92,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/pi': typeof PiRoute
   '/cards/$id': typeof CardsIdRoute
   '/cards/new': typeof CardsNewRoute
   '/demo/table': typeof DemoTableRoute
@@ -98,6 +106,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/pi': typeof PiRoute
   '/cards/$id': typeof CardsIdRoute
   '/cards/new': typeof CardsNewRoute
   '/demo/table': typeof DemoTableRoute
@@ -112,6 +121,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/pi'
     | '/cards/$id'
     | '/cards/new'
     | '/demo/table'
@@ -124,6 +134,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/pi'
     | '/cards/$id'
     | '/cards/new'
     | '/demo/table'
@@ -136,6 +147,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/pi'
     | '/cards/$id'
     | '/cards/new'
     | '/demo/table'
@@ -149,6 +161,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  PiRoute: typeof PiRoute
   CardsIdRoute: typeof CardsIdRoute
   CardsNewRoute: typeof CardsNewRoute
   DemoTableRoute: typeof DemoTableRoute
@@ -162,6 +175,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/pi': {
+      id: '/pi'
+      path: '/pi'
+      fullPath: '/pi'
+      preLoaderRoute: typeof PiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -237,6 +257,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  PiRoute: PiRoute,
   CardsIdRoute: CardsIdRoute,
   CardsNewRoute: CardsNewRoute,
   DemoTableRoute: DemoTableRoute,
