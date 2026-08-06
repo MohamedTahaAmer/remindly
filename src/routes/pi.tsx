@@ -119,10 +119,6 @@ function PastePhotos() {
 
 	return (
 		<div className="space-y-8">
-			<div className="text-sm text-muted-foreground/70 select-none">
-				{status ?? "Ctrl+V anywhere on this page to upload the image from your clipboard."}
-			</div>
-
 			{images.length === 0 ? (
 				<p className="text-sm text-muted-foreground/70 italic font-serif">Nothing here yet.</p>
 			) : (
@@ -168,6 +164,10 @@ function PastePhotos() {
 					))}
 				</div>
 			)}
+
+			<div className="text-xs text-muted-foreground/60 select-none text-center">
+				{status ?? "Ctrl+V anywhere on this page to upload the image from your clipboard."}
+			</div>
 		</div>
 	)
 }
