@@ -2,25 +2,12 @@ import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
 import { Check, Maximize2, Trash2 } from "lucide-react"
 import { env } from "#/env"
+import { copyToClipboard } from "#/lib/clipboard"
 
 export const Route = createFileRoute("/pi")({
 	component: PastePhotos,
 	ssr: false,
 })
-
-async function copyToClipboard(text: string) {
-	try {
-		await navigator.clipboard.writeText(text)
-	} catch {
-		// non-secure contexts (e.g. LAN IP over http) don't expose navigator.clipboard
-		const el = document.createElement("textarea")
-		el.value = text
-		document.body.appendChild(el)
-		el.select()
-		document.execCommand("copy")
-		el.remove()
-	}
-}
 
 function publicUrl(path: string) {
 	const base = env.VITE_PHOTOS_PUBLIC_URL ?? window.location.origin

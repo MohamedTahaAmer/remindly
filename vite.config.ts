@@ -2,6 +2,7 @@ import { defineConfig } from "vite"
 import { devtools } from "@tanstack/devtools-vite"
 import { cloudflare } from "@cloudflare/vite-plugin"
 import { pastedImages } from "./scripts/vite-plugin-pasted-images"
+import { pastedTexts } from "./scripts/vite-plugin-pasted-texts"
 
 import { tanstackStart } from "@tanstack/react-start/plugin/vite"
 
@@ -16,6 +17,7 @@ const config = defineConfig({
 	resolve: { tsconfigPaths: true },
 	plugins: [
 		pastedImages(),
+		pastedTexts(),
 		devtools(),
 		tailwindcss(),
 		tanstackStart(),
