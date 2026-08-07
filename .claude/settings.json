@@ -7,14 +7,6 @@
 					{
 						"type": "command",
 						"command": ".claude/hooks/block-npm-yarn.sh"
-					},
-					{
-						"type": "command",
-						"command": ".claude/hooks/block-dev-server.sh"
-					},
-					{
-						"type": "command",
-						"command": ".claude/hooks/block-mysql-writes.sh"
 					}
 				]
 			}
