@@ -48,6 +48,16 @@ bun --bun run format
 bun --bun run check
 ```
 
+## Hosting on the OVH box (current)
+
+Served by `remindly.service` (systemd, `bun run preview`, restart=always) as a plain
+`vite preview` on the host at **http://192.99.45.15:3333** (`/pi` paste-image board,
+`/pt` paste-text board). Plain http on purpose: no domain is attached, so no Let's
+Encrypt cert; do not paste secrets through it. The box runs ufw with an explicit
+allowlist since 2026-08-20, and `3333/tcp` is allowed there (if the page ever stops
+loading from outside, check `sudo ufw status` first). `VITE_PHOTOS_PUBLIC_URL` in
+`.env.local` and `scripts/pi.sh` both use that same base URL.
+
 ## Deploy to Cloudflare Workers
 
 This project uses the Cloudflare Vite plugin (configured in `vite.config.ts`) and `wrangler.jsonc`:
