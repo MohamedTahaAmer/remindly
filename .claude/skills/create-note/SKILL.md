@@ -41,7 +41,7 @@ Study the existing files in `content/` (e.g. `test-coverage-not-100.md`, `buildi
 
 2. **Pick a filename.** Derive it from the front by this transform: strip the leading `# `, lowercase, drop everything except `a–z 0–9` and spaces, collapse runs of spaces into a single `-`, trim leading/trailing `-`, cap at ~60 chars, append `.md` (e.g. `# Why isn't 100% coverage practical?` → `test-coverage-not-100.md` — shorten by hand if the literal transform is awkwardly long). Then check `content/`: if an existing file's `front` matches this card's (trim and collapse internal whitespace, case-sensitive), reuse that filename so the seed _updates_ that card instead of inserting a duplicate.
 
-3. **Always write the file** to `content/<name>.md` using the format above — do this on every run, whether the content was explicit or drafted. **Then stop and wait for the user's reply.** Tell them the file was written and that they can read/edit it directly, and that you'll seed once they approve. Proceed to step 4 only on an approval ("yes" / "looks good" / "go" / "seed it" / similar); if they ask for changes, edit the file and stop again; do not seed until they approve.
+3. **Always write the file** to `content/<name>.md` using the format above — do this on every run, whether the content was explicit or drafted. Then proceed straight to step 4 — always run the seed after creating a note, without waiting for approval. (If the user later asks for changes, edit the file and re-run the seed; it's an idempotent upsert.)
 
 4. **Push to the DB.** Run:
 
