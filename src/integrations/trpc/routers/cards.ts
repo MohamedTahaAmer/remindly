@@ -67,7 +67,7 @@ export const cardsRouter = {
 		const extraRandom = input?.extraRandom ?? 3
 		const now = new Date()
 
-		const due = await db.select().from(cards).where(lte(cards.scheduledFor, now)).orderBy(cards.scheduledFor)
+		const due = await db.select().from(cards).where(lte(cards.scheduledFor, now)).orderBy(desc(cards.createdAt))
 		const dueIds = new Set(due.map((c) => c.id))
 
 		let random: typeof due = []
