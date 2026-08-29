@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
-import { Check, Eye, EyeOff, Maximize2, Trash2 } from "lucide-react"
+import { Check, Eye, EyeOff, Maximize2, Trash2, Upload } from "lucide-react"
 import { env } from "#/env"
 import { copyToClipboard } from "#/lib/clipboard"
 
@@ -49,6 +49,7 @@ function PastePhotos() {
 	const [copied, setCopied] = useState<string | null>(null)
 	const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 	const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+	const fileInputRef = useRef<HTMLInputElement | null>(null)
 
 	async function refresh() {
 		const res = await fetch("/api/pasted-images")
@@ -73,44 +74,60 @@ function PastePhotos() {
 		})
 	}
 
+	async function uploadFiles(files: Array<File>) {
+		const supported = files.filter((f) => f.type in EXT_BY_MIME)
+		if (supported.length < files.length) {
+			flashToast("Some files were skipped — only images (png, jpg, gif, webp, svg, avif, bmp) are supported", "error", 6000)
+			if (supported.length === 0) return
+		}
+		const items = supported.map((file) => ({ file, name: makeName(file.type) }))
+		// clipboard first — the URL is known up front; the upload runs after
+		await copyToClipboard(items.map((it) => publicUrl(`/pasted-images/${it.name}`)).join("\n"))
+		flashToast("URL copied to clipboard ✓ — uploading…", "success", 60000)
+		try {
+			await Promise.all(
+				items.map(async (it) => {
+					const res = await fetch(`/api/pasted-images?name=${it.name}`, {
+						method: "POST",
+						headers: { "content-type": it.file.type },
+						body: it.file,
+					})
+					if (!res.ok) throw new Error(`upload failed: ${res.status}`)
+				}),
+			)
+			await refresh()
+			flashToast("Uploaded ✓", "success")
+		} catch {
+			flashToast("Upload failed — the copied URL won't resolve", "error", 8000)
+		}
+	}
+
+	// keep the listeners' closure pointing at the latest render's uploadFiles
+	const uploadFilesRef = useRef(uploadFiles)
+	uploadFilesRef.current = uploadFiles
+
 	useEffect(() => {
 		refresh()
 
-		async function uploadFiles(files: Array<File>) {
-			const items = files.map((file) => ({ file, name: makeName(file.type) }))
-			// clipboard first — the URL is known up front; the upload runs after
-			await copyToClipboard(items.map((it) => publicUrl(`/pasted-images/${it.name}`)).join("\n"))
-			flashToast("URL copied to clipboard ✓ — uploading…", "success", 60000)
-			try {
-				await Promise.all(
-					items.map(async (it) => {
-						const res = await fetch(`/api/pasted-images?name=${it.name}`, {
-							method: "POST",
-							headers: { "content-type": it.file.type },
-							body: it.file,
-						})
-						if (!res.ok) throw new Error(`upload failed: ${res.status}`)
-					}),
-				)
-				await refresh()
-				flashToast("Uploaded ✓", "success")
-			} catch {
-				flashToast("Upload failed — the copied URL won't resolve", "error", 8000)
-			}
-		}
-
 		let lastPasteAt = 0
 
-		// global watcher: Ctrl+V anywhere on the page uploads the clipboard image
+		// global watcher: Ctrl+V anywhere on the page uploads the clipboard image.
+		// clipboardData.files carries both screenshots and files copied with
+		// Ctrl+C in the OS file manager (the browser hands over the file itself)
 		function onPaste(e: ClipboardEvent) {
 			lastPasteAt = Date.now()
-			const files = Array.from(e.clipboardData?.items ?? [])
-				.filter((item) => item.type.startsWith("image/"))
-				.map((item) => item.getAsFile())
-				.filter((f): f is File => f !== null)
-			if (files.length === 0) return
+			const files = Array.from(e.clipboardData?.files ?? []).filter((f) => f.type.startsWith("image/"))
+			if (files.length === 0) {
+				// a copy from some file managers only reaches the page as a path,
+				// which the browser can't read from disk — point at the button instead
+				const text = e.clipboardData?.getData("text/uri-list") || e.clipboardData?.getData("text/plain") || ""
+				if (/^(file:\/\/|\/|~\/|[a-zA-Z]:\\)/.test(text.trim())) {
+					flashToast("Clipboard only holds a file path — the browser can't read it; use the Upload button", "error", 6000)
+				}
+				return
+			}
 			e.preventDefault()
-			uploadFiles(files)
+			uploadFilesRef.current(files)
 		}
 
 		// fallback keyed on the physical V key (e.code), so Ctrl+V works on any
@@ -133,7 +150,7 @@ function PastePhotos() {
 						const blob = await item.getType(type)
 						files.push(new File([blob], "clipboard", { type }))
 					}
-					if (files.length > 0) uploadFiles(files)
+					if (files.length > 0) uploadFilesRef.current(files)
 				} catch {
 					// clipboard read denied — the native paste path is the only option
 				}
@@ -166,7 +183,27 @@ function PastePhotos() {
 
 	return (
 		<div className="space-y-8">
-			<div className="flex items-center justify-end">
+			<div className="flex items-center justify-end gap-2">
+				<input
+					ref={fileInputRef}
+					type="file"
+					accept="image/*"
+					multiple
+					className="hidden"
+					onChange={(e) => {
+						const files = Array.from(e.target.files ?? [])
+						e.target.value = "" // allow re-picking the same file
+						if (files.length > 0) uploadFiles(files)
+					}}
+				/>
+				<button
+					type="button"
+					onClick={() => fileInputRef.current?.click()}
+					className="flex items-center gap-2 rounded-md border border-border px-3 py-1.5 text-sm text-muted-foreground transition hover:bg-accent hover:text-accent-foreground cursor-pointer"
+				>
+					<Upload className="h-4 w-4" />
+					Upload
+				</button>
 				<button
 					type="button"
 					onClick={toggleShowImages}
@@ -217,7 +254,9 @@ function PastePhotos() {
 				</div>
 			)}
 
-			<div className="text-xs text-muted-foreground/60 select-none text-center">Ctrl+V anywhere on this page to upload the image from your clipboard.</div>
+			<div className="text-xs text-muted-foreground/60 select-none text-center">
+				Ctrl+V anywhere on this page to upload the image from your clipboard, or pick files with the Upload button.
+			</div>
 
 			{toast && (
 				<div
