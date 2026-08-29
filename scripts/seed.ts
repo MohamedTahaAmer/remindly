@@ -47,9 +47,14 @@ function parseCard(source: string, filename: string): SeedCard {
 	return { front, back, detailsMarkdown: details || null }
 }
 
+// Content files are named NNNN_slug.md (4-digit number, then the slug).
+const FILENAME_RE = /^\d{4}_.+\.md$/
+
 async function loadSeeds(): Promise<SeedCard[]> {
 	const entries = await readdir(CONTENT_DIR)
-	const files = entries.filter((f) => f.endsWith(".md")).sort()
+	const bad = entries.filter((f) => f.endsWith(".md") && !FILENAME_RE.test(f))
+	if (bad.length) throw new Error(`content file(s) not matching NNNN_slug.md: ${bad.join(", ")}`)
+	const files = entries.filter((f) => FILENAME_RE.test(f)).sort()
 	const out: SeedCard[] = []
 	for (const f of files) {
 		const source = await readFile(join(CONTENT_DIR, f), "utf8")

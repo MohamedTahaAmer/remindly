@@ -28,7 +28,7 @@ Rules the parser enforces (don't violate them):
 - Everything after the first `---` line becomes `detailsMarkdown` (optional). Omit the `---` and details entirely if there's nothing more to add.
 - `front` ≤ 500 chars (it's a `varchar(500)`); `back` and details are `text`, so no practical length limit.
 
-Study the existing files in `content/` (e.g. `test-coverage-not-100.md`, `building-guardrails-for-llm-code.md`) to match tone and structure: the `front` is a sharp question, the `back` is a tight summary, and details expand with headings, lists, and a closing principle.
+Study the existing files in `content/` (e.g. `0012_test-coverage-not-100.md`, `0001_building-guardrails-for-llm-code.md`) to match tone and structure: the `front` is a sharp question, the `back` is a tight summary, and details expand with headings, lists, and a closing principle.
 
 ## Steps
 
@@ -39,7 +39,7 @@ Study the existing files in `content/` (e.g. `test-coverage-not-100.md`, `buildi
 
    If the user gave explicit front/back text, use it directly. If they gave only a rough topic, draft all three yourself in the house style.
 
-2. **Pick a filename.** Derive it from the front by this transform: strip the leading `# `, lowercase, drop everything except `a–z 0–9` and spaces, collapse runs of spaces into a single `-`, trim leading/trailing `-`, cap at ~60 chars, append `.md` (e.g. `# Why isn't 100% coverage practical?` → `test-coverage-not-100.md` — shorten by hand if the literal transform is awkwardly long). Then check `content/`: if an existing file's `front` matches this card's (trim and collapse internal whitespace, case-sensitive), reuse that filename so the seed _updates_ that card instead of inserting a duplicate.
+2. **Pick a filename.** Files are named `NNNN_<slug>.md` — a 4-digit zero-padded sequence number, an underscore, then the slug. Derive the slug from the front by this transform: strip the leading `# `, lowercase, drop everything except `a–z 0–9` and spaces, collapse runs of spaces into a single `-`, trim leading/trailing `-`, cap at ~60 chars (e.g. `# Why isn't 100% coverage practical?` → `test-coverage-not-100` — shorten by hand if the literal transform is awkwardly long). For the number, list `content/` and use the highest existing prefix + 1 (e.g. if `0016_…` is the highest, the new file is `0017_<slug>.md`). But first check `content/`: if an existing file's `front` matches this card's (trim and collapse internal whitespace, case-sensitive), reuse that file — same number and name — so the seed _updates_ that card instead of inserting a duplicate.
 
 3. **Always write the file** to `content/<name>.md` using the format above — do this on every run, whether the content was explicit or drafted. Then proceed straight to step 4 — always run the seed after creating a note, without waiting for approval. (If the user later asks for changes, edit the file and re-run the seed; it's an idempotent upsert.)
 
