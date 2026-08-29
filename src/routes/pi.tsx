@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
-import { Check, Maximize2, Trash2 } from "lucide-react"
+import { Check, Eye, EyeOff, Maximize2, Trash2 } from "lucide-react"
 import { env } from "#/env"
 import { copyToClipboard } from "#/lib/clipboard"
 
@@ -32,40 +32,55 @@ function makeName(type: string) {
 	return `img-${stamp}-${Math.random().toString(36).slice(2, 8)}.${EXT_BY_MIME[type] ?? "png"}`
 }
 
+const SHOW_IMAGES_KEY = "pi:show-images"
+
+type Toast = { text: string; kind: "success" | "error" }
+
 function PastePhotos() {
 	const [images, setImages] = useState<Array<string>>([])
-	const [status, setStatus] = useState<string | null>(null)
+	const [showImages, setShowImages] = useState<boolean>(() => {
+		try {
+			return localStorage.getItem(SHOW_IMAGES_KEY) === "1"
+		} catch {
+			return false
+		}
+	})
+	const [toast, setToast] = useState<Toast | null>(null)
 	const [copied, setCopied] = useState<string | null>(null)
 	const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-	const statusTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+	const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
 	async function refresh() {
 		const res = await fetch("/api/pasted-images")
 		setImages(await res.json())
 	}
 
-	function flashStatus(text: string, ms = 3000) {
-		if (statusTimer.current) clearTimeout(statusTimer.current)
-		setStatus(text)
-		statusTimer.current = setTimeout(() => setStatus(null), ms)
+	function flashToast(text: string, kind: Toast["kind"], ms = 3000) {
+		if (toastTimer.current) clearTimeout(toastTimer.current)
+		setToast({ text, kind })
+		toastTimer.current = setTimeout(() => setToast(null), ms)
+	}
+
+	function toggleShowImages() {
+		setShowImages((prev) => {
+			const next = !prev
+			try {
+				localStorage.setItem(SHOW_IMAGES_KEY, next ? "1" : "0")
+			} catch {
+				// localStorage unavailable — the toggle still works for this visit
+			}
+			return next
+		})
 	}
 
 	useEffect(() => {
 		refresh()
 
-		// global watcher: Ctrl+V anywhere on the page uploads the clipboard image
-		async function onPaste(e: ClipboardEvent) {
-			const files = Array.from(e.clipboardData?.items ?? [])
-				.filter((item) => item.type.startsWith("image/"))
-				.map((item) => item.getAsFile())
-				.filter((f): f is File => f !== null)
-			if (files.length === 0) return
-			e.preventDefault()
-
+		async function uploadFiles(files: Array<File>) {
 			const items = files.map((file) => ({ file, name: makeName(file.type) }))
 			// clipboard first — the URL is known up front; the upload runs after
 			await copyToClipboard(items.map((it) => publicUrl(`/pasted-images/${it.name}`)).join("\n"))
-			flashStatus("URL copied ✓ — uploading in background…", 60000)
+			flashToast("URL copied to clipboard ✓ — uploading…", "success", 60000)
 			try {
 				await Promise.all(
 					items.map(async (it) => {
@@ -78,14 +93,57 @@ function PastePhotos() {
 					}),
 				)
 				await refresh()
-				flashStatus("Uploaded ✓")
+				flashToast("Uploaded ✓", "success")
 			} catch {
-				flashStatus("Upload failed — the copied URL won't resolve", 8000)
+				flashToast("Upload failed — the copied URL won't resolve", "error", 8000)
 			}
 		}
 
+		let lastPasteAt = 0
+
+		// global watcher: Ctrl+V anywhere on the page uploads the clipboard image
+		function onPaste(e: ClipboardEvent) {
+			lastPasteAt = Date.now()
+			const files = Array.from(e.clipboardData?.items ?? [])
+				.filter((item) => item.type.startsWith("image/"))
+				.map((item) => item.getAsFile())
+				.filter((f): f is File => f !== null)
+			if (files.length === 0) return
+			e.preventDefault()
+			uploadFiles(files)
+		}
+
+		// fallback keyed on the physical V key (e.code), so Ctrl+V works on any
+		// keyboard layout (e.g. Arabic, where the key produces "ر") even if the
+		// browser doesn't map that combo to a native paste
+		function onKeyDown(e: KeyboardEvent) {
+			if (!(e.ctrlKey || e.metaKey) || e.code !== "KeyV") return
+			const pressedAt = Date.now()
+			setTimeout(async () => {
+				if (lastPasteAt >= pressedAt) return // the native paste event already handled it
+				if (!navigator.clipboard?.read) return // needs a secure context; nothing more we can do
+				try {
+					const clipItems = await navigator.clipboard.read()
+					const files: Array<File> = []
+					for (const item of clipItems) {
+						const type = item.types.find((t) => t.startsWith("image/"))
+						if (!type) continue
+						const blob = await item.getType(type)
+						files.push(new File([blob], "clipboard", { type }))
+					}
+					if (files.length > 0) uploadFiles(files)
+				} catch {
+					// clipboard read denied — the native paste path is the only option
+				}
+			}, 250)
+		}
+
 		document.addEventListener("paste", onPaste)
-		return () => document.removeEventListener("paste", onPaste)
+		document.addEventListener("keydown", onKeyDown)
+		return () => {
+			document.removeEventListener("paste", onPaste)
+			document.removeEventListener("keydown", onKeyDown)
+		}
 	}, [])
 
 	function flashCopied(name: string) {
@@ -106,7 +164,22 @@ function PastePhotos() {
 
 	return (
 		<div className="space-y-8">
-			{images.length === 0 ? (
+			<div className="flex items-center justify-end">
+				<button
+					type="button"
+					onClick={toggleShowImages}
+					className="flex items-center gap-2 rounded-md border border-border px-3 py-1.5 text-sm text-muted-foreground transition hover:bg-accent hover:text-accent-foreground cursor-pointer"
+				>
+					{showImages ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+					{showImages ? "Hide images" : `Show images${images.length > 0 ? ` (${images.length})` : ""}`}
+				</button>
+			</div>
+
+			{!showImages ? (
+				<p className="text-sm text-muted-foreground/70 italic font-serif text-center">
+					{images.length === 0 ? "Nothing here yet." : `${images.length} image${images.length === 1 ? "" : "s"} hidden.`}
+				</p>
+			) : images.length === 0 ? (
 				<p className="text-sm text-muted-foreground/70 italic font-serif">Nothing here yet.</p>
 			) : (
 				<div className="grid grid-cols-8 gap-3">
@@ -153,8 +226,18 @@ function PastePhotos() {
 			)}
 
 			<div className="text-xs text-muted-foreground/60 select-none text-center">
-				{status ?? "Ctrl+V anywhere on this page to upload the image from your clipboard."}
+				Ctrl+V anywhere on this page to upload the image from your clipboard.
 			</div>
+
+			{toast && (
+				<div
+					className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 rounded-lg px-4 py-2.5 text-sm font-medium text-white shadow-lg pointer-events-none ${
+						toast.kind === "success" ? "bg-emerald-600" : "bg-red-600"
+					}`}
+				>
+					{toast.text}
+				</div>
+			)}
 		</div>
 	)
 }
