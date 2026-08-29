@@ -121,9 +121,11 @@ function PastePhotos() {
 			const pressedAt = Date.now()
 			setTimeout(async () => {
 				if (lastPasteAt >= pressedAt) return // the native paste event already handled it
-				if (!navigator.clipboard?.read) return // needs a secure context; nothing more we can do
+				// lib.dom types say clipboard always exists, but insecure contexts (http on a LAN IP) don't expose it
+				const clipboard = navigator.clipboard as Clipboard | undefined
+				if (!clipboard?.read) return // needs a secure context; nothing more we can do
 				try {
-					const clipItems = await navigator.clipboard.read()
+					const clipItems = await clipboard.read()
 					const files: Array<File> = []
 					for (const item of clipItems) {
 						const type = item.types.find((t) => t.startsWith("image/"))
@@ -185,18 +187,8 @@ function PastePhotos() {
 				<div className="grid grid-cols-8 gap-3">
 					{images.map((name) => (
 						<div key={name} className="relative group">
-							<button
-								type="button"
-								onClick={() => copyImageUrl(name)}
-								aria-label="Copy URL"
-								className="block w-full cursor-pointer"
-							>
-								<img
-									src={`/pasted-images/${name}`}
-									alt={name}
-									loading="lazy"
-									className="aspect-square w-full object-cover rounded-lg border border-border"
-								/>
+							<button type="button" onClick={() => copyImageUrl(name)} aria-label="Copy URL" className="block w-full cursor-pointer">
+								<img src={`/pasted-images/${name}`} alt={name} loading="lazy" className="aspect-square w-full object-cover rounded-lg border border-border" />
 							</button>
 							{copied === name && (
 								<div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/40 pointer-events-none">
@@ -225,9 +217,7 @@ function PastePhotos() {
 				</div>
 			)}
 
-			<div className="text-xs text-muted-foreground/60 select-none text-center">
-				Ctrl+V anywhere on this page to upload the image from your clipboard.
-			</div>
+			<div className="text-xs text-muted-foreground/60 select-none text-center">Ctrl+V anywhere on this page to upload the image from your clipboard.</div>
 
 			{toast && (
 				<div

@@ -169,10 +169,7 @@ function EditCard() {
 						</div>
 						<div className="mb-10">
 							<div className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground mb-3">Answer</div>
-							<div
-								className="prose prose-xl max-w-none font-serif [overflow-wrap:anywhere]"
-								dangerouslySetInnerHTML={{ __html: parseBlockMarkdown(back) }}
-							/>
+							<div className="prose prose-xl max-w-none font-serif [overflow-wrap:anywhere]" dangerouslySetInnerHTML={{ __html: parseBlockMarkdown(back) }} />
 						</div>
 						{detailsHtml ? (
 							<section className="border-t border-border pt-8">
