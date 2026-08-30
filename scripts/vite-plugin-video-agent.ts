@@ -1,8 +1,7 @@
 import { spawn } from "node:child_process"
 import fs from "node:fs"
+import os from "node:os"
 import path from "node:path"
-import Anthropic from "@anthropic-ai/sdk"
-import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod"
 import { loadEnv } from "vite"
 import { z } from "zod"
 import type { ServerResponse } from "node:http"
@@ -14,7 +13,10 @@ import type { Connect, Plugin } from "vite"
 // of a server route. Working files live under _local/video-agent (gitignored).
 let BASE = ""
 let ASSEMBLYAI_API_KEY = ""
-let ANTHROPIC_API_KEY = ""
+// AI analysis runs through the installed Claude Code CLI (subscription auth),
+// not an API key. The systemd service PATH lacks ~/.local/bin, so resolve the
+// binary to an absolute path when possible.
+let CLAUDE_BIN = ""
 
 const ID_RE = /^va-[0-9]{8}-[0-9]{6}-[a-z0-9]{1,8}$/
 const VIDEO_EXTS: Record<string, string> = {
@@ -94,7 +96,7 @@ function json(res: ServerResponse, status: number, body: unknown) {
 	res.end(JSON.stringify(body))
 }
 
-function run(cmd: string, args: Array<string>): Promise<{ stdout: string; stderr: string }> {
+function run(cmd: string, args: Array<string>, input?: string): Promise<{ stdout: string; stderr: string }> {
 	return new Promise((resolve, reject) => {
 		const child = spawn(cmd, args)
 		let stdout = ""
@@ -106,6 +108,7 @@ function run(cmd: string, args: Array<string>): Promise<{ stdout: string; stderr
 			if (code === 0) resolve({ stdout, stderr })
 			else reject(new Error(`${cmd} exited with ${code}: ${stderr.slice(-2000)}`))
 		})
+		if (input !== undefined) child.stdin.end(input)
 	})
 }
 
@@ -224,7 +227,7 @@ const CutList = z.object({
 
 const EDIT_POLICY = `You are a video-editing assistant. You receive a spoken-word transcript where every word
 is prefixed with its index like [12]word. Identify spans that should be CUT from the video
-to tighten it, and return them via the required output format.
+to tighten it, and return them as JSON.
 
 What to cut:
 - repeated_word: immediate repeats and stutters ("the the", "I- I think"). Keep the LAST
@@ -244,7 +247,11 @@ Rules:
 - Be conservative. If removing a span could change meaning or sound unnatural, either skip
   it or mark it confidence "low". Never cut content that is merely redundant in meaning
   but worded differently - only true verbal mistakes.
-- If there is nothing to cut, return an empty list.`
+- If there is nothing to cut, return an empty list.
+
+Output format:
+Respond with ONLY this JSON object - no markdown fences, no prose before or after:
+{"cuts":[{"first_word":<int>,"last_word":<int>,"reason":"repeated_word"|"repeated_sentence"|"false_start"|"retake"|"filler","text":"<exact words>","confidence":"high"|"medium"|"low"}]}`
 
 function normalizeForEcho(text: string): string {
 	return text
@@ -259,19 +266,30 @@ async function analyze(state: ProjectState): Promise<{ cuts: Array<AiCut>; flagg
 	if (!words) throw new Error("no transcript available")
 
 	const numberedTranscript = words.map((w, i) => `[${i}]${w.text}`).join(" ")
-	const client = new Anthropic({ apiKey: ANTHROPIC_API_KEY })
-	// claude-opus-5: thinking is adaptive by default (omit the param), temperature removed
-	const response = await client.messages.parse({
-		model: "claude-opus-5",
-		max_tokens: 16000,
-		system: EDIT_POLICY,
-		messages: [{ role: "user", content: numberedTranscript }],
-		output_config: { format: zodOutputFormat(CutList) },
-	})
-	if (response.parsed_output === null) throw new Error("model returned unparseable output")
+	// headless Claude Code call on the CLI's subscription auth: no tools, no
+	// settings/CLAUDE.md context, transcript over stdin (arg length limits)
+	let result
+	try {
+		result = await run(
+			CLAUDE_BIN,
+			["-p", "--model", "claude-opus-5", "--output-format", "json", "--tools", "", "--setting-sources", "", "--system-prompt", EDIT_POLICY],
+			numberedTranscript,
+		)
+	} catch (err) {
+		const message = (err as NodeJS.ErrnoException).code === "ENOENT" ? "claude CLI not found on this machine" : (err as Error).message
+		throw new Error(message)
+	}
+	const envelope = JSON.parse(result.stdout) as { is_error: boolean; result: string }
+	if (envelope.is_error) throw new Error(`claude CLI failed: ${envelope.result.slice(0, 500)}`)
+	const text = envelope.result
+		.trim()
+		.replace(/^```(?:json)?\s*/, "")
+		.replace(/```\s*$/, "")
+	const parsed = CutList.safeParse(JSON.parse(text))
+	if (!parsed.success) throw new Error("model returned JSON that doesn't match the cut schema")
 
 	// validation: bounds, echo check (the hallucination guard), sort, merge overlaps
-	const valid = response.parsed_output.cuts.filter((c) => {
+	const valid = parsed.data.cuts.filter((c) => {
 		if (!(c.first_word >= 0 && c.first_word <= c.last_word && c.last_word < words.length)) return false
 		const actual = words
 			.slice(c.first_word, c.last_word + 1)
@@ -487,8 +505,8 @@ const middleware: Connect.NextHandleFunction = (req, res, next) => {
 		}
 
 		if (action === "/analyze" && req.method === "POST") {
-			if (!ANTHROPIC_API_KEY) {
-				json(res, 400, { error: "ANTHROPIC_API_KEY is not set in .env.local" })
+			if (!CLAUDE_BIN) {
+				json(res, 400, { error: "claude CLI not found on this machine" })
 				return
 			}
 			if (!state.words || state.words.length === 0) {
@@ -567,7 +585,8 @@ export function videoAgent(): Plugin {
 			const env = loadEnv(config.mode, config.root, "") as Record<string, string | undefined>
 			BASE = path.resolve(config.root, "_local/video-agent")
 			ASSEMBLYAI_API_KEY = env.ASSEMBLYAI_API_KEY ?? ""
-			ANTHROPIC_API_KEY = env.ANTHROPIC_API_KEY ?? ""
+			const localBin = path.join(os.homedir(), ".local/bin/claude")
+			CLAUDE_BIN = fs.existsSync(localBin) ? localBin : "claude"
 		},
 		configureServer(server) {
 			server.middlewares.use(middleware)
