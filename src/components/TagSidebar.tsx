@@ -141,11 +141,7 @@ export function TagSidebar() {
 								clear
 							</button>
 						)}
-						<button
-							onClick={() => setCollapsedPersisted(true)}
-							title="Hide tags"
-							className="text-muted-foreground hover:text-foreground transition"
-						>
+						<button onClick={() => setCollapsedPersisted(true)} title="Hide tags" className="text-muted-foreground hover:text-foreground transition">
 							<ChevronsLeft className="size-4" />
 						</button>
 					</div>

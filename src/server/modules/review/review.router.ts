@@ -1,6 +1,6 @@
 import type { TRPCRouterRecord } from "@trpc/server"
 
-import { publicProcedure } from "#/server/infrastructure/trpc/trpc"
+import { publicProcedure } from "#/server/infrastructure/trpc/procedures"
 import { reviewService } from "./review.service.ts"
 import { reviewHistoryInputSchema, reviewHistoryOutputSchema, reviewSubmitInputSchema, reviewSubmitOutputSchema } from "./dto/review.dto.ts"
 

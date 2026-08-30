@@ -1,7 +1,7 @@
 import type { TRPCRouterRecord } from "@trpc/server"
 
 import { okOutputSchema } from "#/server/common/dto/common.dto"
-import { publicProcedure } from "#/server/infrastructure/trpc/trpc"
+import { publicProcedure } from "#/server/infrastructure/trpc/procedures"
 import { pastedTextsService as service } from "./pasted-texts.service.ts"
 import { pastedTextCreateInputSchema, pastedTextCreateOutputSchema, pastedTextDeleteInputSchema, pastedTextListOutputSchema } from "./dto/pasted-texts.dto.ts"
 

@@ -1,7 +1,7 @@
 import type { TRPCRouterRecord } from "@trpc/server"
 
 import { okOutputSchema } from "#/server/common/dto/common.dto"
-import { publicProcedure } from "#/server/infrastructure/trpc/trpc"
+import { publicProcedure } from "#/server/infrastructure/trpc/procedures"
 import { tagsService } from "./tags.service.ts"
 import { tagCreateInputSchema, tagCreateOutputSchema, tagDeleteInputSchema, tagListOutputSchema } from "./dto/tags.dto.ts"
 

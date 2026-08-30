@@ -1,7 +1,7 @@
 import type { TRPCRouterRecord } from "@trpc/server"
 
 import { okOutputSchema } from "#/server/common/dto/common.dto"
-import { publicProcedure } from "#/server/infrastructure/trpc/trpc"
+import { publicProcedure } from "#/server/infrastructure/trpc/procedures"
 import { pastedImagesService as service } from "./pasted-images.service.ts"
 import { pastedImageDeleteInputSchema, pastedImageListOutputSchema } from "./dto/pasted-images.dto.ts"
 

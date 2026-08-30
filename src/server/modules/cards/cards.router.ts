@@ -1,7 +1,7 @@
 import type { TRPCRouterRecord } from "@trpc/server"
 
 import { okOutputSchema } from "#/server/common/dto/common.dto"
-import { publicProcedure } from "#/server/infrastructure/trpc/trpc"
+import { publicProcedure } from "#/server/infrastructure/trpc/procedures"
 import { cardsService } from "./cards.service.ts"
 import {
 	cardCreateInputSchema,

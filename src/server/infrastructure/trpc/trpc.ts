@@ -6,4 +6,7 @@ const t = initTRPC.create({
 })
 
 export const createTRPCRouter = t.router
-export const publicProcedure = t.procedure
+export const middleware = t.middleware
+// Base procedure without middleware — compose the app procedures in
+// procedures.ts (routers import from there, not from here).
+export const baseProcedure = t.procedure

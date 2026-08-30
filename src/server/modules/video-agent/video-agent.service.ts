@@ -6,6 +6,7 @@ import { pipeline } from "node:stream/promises"
 import { TRPCError } from "@trpc/server"
 
 import { run } from "#/server/common/helpers/spawn.helper"
+import { Logger } from "#/server/common/services/logger"
 import { serverConfig } from "#/server/infrastructure/config/config"
 import { EDIT_POLICY, MAX_ANALYZE_WORDS, PROJECT_ID_RE } from "./video-agent.constants.ts"
 import { cutListSchema } from "./dto/video-agent.dto.ts"
@@ -18,6 +19,8 @@ import type { AiCut, ProjectState, Span, Word } from "./dto/video-agent.dto.ts"
  * render) run async after the endpoint has responded, driving state.json.
  */
 export class VideoAgentService {
+	private readonly logger = new Logger(VideoAgentService.name)
+
 	private dirOf(id: string) {
 		return path.join(serverConfig.videoAgentDir, id)
 	}
@@ -108,6 +111,7 @@ export class VideoAgentService {
 
 		// each run bills a subscription request — return the cached result unless forced
 		if (state.analysis && !force) return { cuts: state.analysis.cuts, flagged: state.analysis.flagged }
+		this.logger.log(`running AI analysis for ${id} (${state.words.length} words)`)
 		try {
 			const result = await this.analyze(state)
 			this.patchState(id, { analysis: { ...result, at: new Date().toISOString() } })
@@ -122,10 +126,17 @@ export class VideoAgentService {
 		if (state.export.status === "rendering") throw new TRPCError({ code: "CONFLICT", message: "already rendering" })
 
 		this.patchState(id, { export: { status: "rendering" } })
+		this.logger.log(`export render ${id} started (${cuts.length} cuts)`)
 		// render async; the frontend polls `getStateOrThrow` until export.status settles
 		this.renderExport(id, cuts)
-			.then(() => this.patchState(id, { export: { status: "ready" } }))
-			.catch((err: Error) => this.patchState(id, { export: { status: "error", error: err.message } }))
+			.then(() => {
+				this.patchState(id, { export: { status: "ready" } })
+				this.logger.log(`export render ${id} ready`)
+			})
+			.catch((err: Error) => {
+				this.patchState(id, { export: { status: "error", error: err.message } })
+				this.logger.error(`export render ${id} failed`, err)
+			})
 		return { ok: true } as const
 	}
 
@@ -173,6 +184,7 @@ export class VideoAgentService {
 			const words = await this.transcribe(wav)
 			this.patchState(id, { words, step: "done", status: "ready" })
 		} catch (err) {
+			this.logger.warn(`transcription for ${id} failed — ${(err as Error).message}`)
 			this.patchState(id, { words: null, transcriptError: `transcription failed: ${(err as Error).message}`, step: "done", status: "ready" })
 		}
 	}

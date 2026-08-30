@@ -2,6 +2,7 @@ import fs from "node:fs"
 import path from "node:path"
 
 import { fileStream, json } from "#/server/common/helpers/http.helper"
+import { Logger } from "#/server/common/services/logger"
 import { PROJECT_ID_RE, VIDEO_EXTS } from "./video-agent.constants.ts"
 import { videoAgentService as service } from "./video-agent.service.ts"
 import type { ProjectState } from "./dto/video-agent.dto.ts"
@@ -13,6 +14,8 @@ import type { ProjectState } from "./dto/video-agent.dto.ts"
  * Bound to URLs by the file routes in src/routes/api.video-agent.*.
  */
 export class VideoAgentController {
+	private readonly logger = new Logger(VideoAgentController.name)
+
 	/** The id regex is the path-traversal guard for every :id endpoint. */
 	private stateOr404(id: string): ProjectState | Response {
 		const state = PROJECT_ID_RE.test(id) ? service.readState(id) : null
@@ -28,8 +31,10 @@ export class VideoAgentController {
 		if (!request.body) return json({ error: "expected a video body" }, 400)
 
 		const id = await service.createProject(name, ext, request.body)
+		this.logger.log(`upload ${id} (${name}) saved, processing`)
 		// respond once saved; the pipeline continues async, driving state.json
 		service.process(id).catch((err: Error) => {
+			this.logger.error(`processing ${id} failed`, err)
 			service.patchState(id, { status: "error", error: err.message })
 		})
 		return json({ id })
