@@ -1,5 +1,7 @@
 # What actually happens, layer by layer, when Node.js reads a file synchronously?
 
+tags: nodejs, os
+
 `fs.readFileSync` goes V8 → Node's C++ binding (`node_file.cc`) → libuv with a NULL callback (so it runs _inline_ — no event loop, no thread pool, no epoll) → glibc's `open()`/`read()` wrappers, which just load the syscall arguments and execute the `syscall` instruction → kernel VFS → page cache. On a cache hit it's a `copy_to_user` memcpy and returns in microseconds; on a miss the block layer DMAs from disk while your _entire main thread sleeps_ — V8, the event loop, everything — until the completion interrupt wakes it. That total blockage is why sync fs is poison in a server.
 
 ---

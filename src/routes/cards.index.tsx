@@ -2,15 +2,26 @@ import { createFileRoute, Link } from "@tanstack/react-router"
 import { useQuery } from "@tanstack/react-query"
 import { useTRPC } from "#/integrations/trpc/react"
 import { parseInlineMarkdown } from "#/lib/markdown"
+import { validateTagSearch } from "#/components/TagSidebar"
 
 export const Route = createFileRoute("/cards/")({
 	component: CardsList,
-	loader: async ({ context }) => {
-		await context.queryClient.prefetchQuery(context.trpc.cards.list.queryOptions())
+	validateSearch: validateTagSearch,
+	loaderDeps: ({ search }) => ({ tags: search.tags, match: search.match }),
+	loader: async ({ context, deps }) => {
+		await context.queryClient.prefetchQuery(context.trpc.cards.list.queryOptions({ tagIds: deps.tags, match: deps.match ?? "any" }))
 	},
 })
 
-type Card = { id: number; front: string; back: string; detailsMarkdown: string | null; intervalIndex: number; scheduledFor: string | Date }
+type Card = {
+	id: number
+	front: string
+	back: string
+	detailsMarkdown: string | null
+	intervalIndex: number
+	scheduledFor: string | Date
+	tags: { id: number; name: string }[]
+}
 
 function startOfDay(d: Date) {
 	const x = new Date(d)
@@ -50,7 +61,8 @@ const BUCKETS: { key: "overdue" | "today" | "soon" | "later"; label: string; acc
 
 function CardsList() {
 	const trpc = useTRPC()
-	const { data } = useQuery(trpc.cards.list.queryOptions())
+	const { tags: selectedTags, match } = Route.useSearch()
+	const { data } = useQuery(trpc.cards.list.queryOptions({ tagIds: selectedTags, match: match ?? "any" }))
 
 	const grouped: Record<string, Card[]> = { overdue: [], today: [], soon: [], later: [] }
 	for (const c of (data ?? []) as Card[]) grouped[bucketOf(c.scheduledFor)].push(c)
@@ -110,6 +122,15 @@ function CardsList() {
 											style={{ viewTransitionName: `card-title-${c.id}` }}
 											dangerouslySetInnerHTML={{ __html: parseInlineMarkdown(c.front) }}
 										/>
+										{c.tags.length > 0 && (
+											<div className="flex flex-wrap gap-1.5 mt-1.5">
+												{c.tags.map((t) => (
+													<span key={t.id} className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground bg-muted rounded-full px-2 py-0.5">
+														{t.name}
+													</span>
+												))}
+											</div>
+										)}
 									</div>
 									<div className="flex gap-4 text-xs font-mono uppercase tracking-wider shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
 										{c.detailsMarkdown && (

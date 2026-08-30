@@ -1,5 +1,7 @@
 # In playwright.config.ts, which options go inside `use` and which go at the top level?
 
+tags: playwright, testing
+
 `use` configures the **browser context** (`baseURL`, `trace`, `screenshot`, `storageState`, `viewport`). Everything else — `testDir`, `timeout`, `retries`, `workers`, `projects` — is a **runner option** and belongs at the top level of `defineConfig`. The trap: put a runner option like `timeout` inside `use` and Playwright **silently ignores it** — no error, no warning. It just doesn't apply. Beyond that, keep the starter config tiny and add layers only when earned: `webServer` → `baseURL` → traces/screenshots → projects.
 
 Source: [Configuring Playwright — Steve Kinney](https://stevekinney.com/courses/self-testing-ai-agents/configuring-playwright)

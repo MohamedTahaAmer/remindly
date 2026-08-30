@@ -1,5 +1,7 @@
 # How do generics and mixins combine when a function returns a class in TypeScript?
 
+tags: typescript
+
 A class is a **value**, so a function can return one — and that unlocks two patterns. With **generics**, a function's type parameter bakes into the class it returns: `SimpleMemoryDatabase<T>()` hands back a class whose methods are already typed to `T`, so `SimpleMemoryDatabase<string>()` is a real `StringDatabase` class. With **mixins**, a function takes a class and returns an _extended_ one: typed `Base: Constructor<...>`, it `extends Base` and adds methods. The two compose — you can feed a generic factory's class straight into a mixin.
 
 ---

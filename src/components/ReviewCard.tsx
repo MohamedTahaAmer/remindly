@@ -9,6 +9,7 @@ type Card = {
 	back: string
 	detailsMarkdown: string | null
 	intervalIndex: number
+	tags?: { id: number; name: string }[]
 }
 
 export function ReviewCard({ card }: { card: Card }) {
@@ -23,6 +24,16 @@ export function ReviewCard({ card }: { card: Card }) {
 					className="text-base font-medium mb-4 [overflow-wrap:anywhere] [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:font-mono [&_code]:text-[0.9em]"
 					dangerouslySetInnerHTML={{ __html: titleHtml }}
 				/>
+
+				{!!card.tags?.length && (
+					<div className="flex flex-wrap gap-1.5 mb-4">
+						{card.tags.map((t) => (
+							<span key={t.id} className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground bg-muted rounded-full px-2 py-0.5">
+								{t.name}
+							</span>
+						))}
+					</div>
+				)}
 
 				<button
 					onClick={() => setOpen(true)}

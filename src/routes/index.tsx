@@ -3,17 +3,21 @@ import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
 import { useTRPC } from "#/integrations/trpc/react"
 import { ReviewCard } from "#/components/ReviewCard"
+import { validateTagSearch } from "#/components/TagSidebar"
 
 export const Route = createFileRoute("/")({
 	component: HomePage,
-	loader: async ({ context }) => {
-		await context.queryClient.prefetchQuery(context.trpc.cards.dueToday.queryOptions())
+	validateSearch: validateTagSearch,
+	loaderDeps: ({ search }) => ({ tags: search.tags, match: search.match }),
+	loader: async ({ context, deps }) => {
+		await context.queryClient.prefetchQuery(context.trpc.cards.dueToday.queryOptions({ tagIds: deps.tags, match: deps.match ?? "any" }))
 	},
 })
 
 function HomePage() {
 	const trpc = useTRPC()
-	const { data, isLoading } = useQuery(trpc.cards.dueToday.queryOptions())
+	const { tags: selectedTags, match } = Route.useSearch()
+	const { data, isLoading } = useQuery(trpc.cards.dueToday.queryOptions({ tagIds: selectedTags, match: match ?? "any" }))
 	const [surprise, setSurprise] = useState(false)
 	const surpriseQuery = useQuery({
 		...trpc.cards.surprise.queryOptions({ n: 6 }),

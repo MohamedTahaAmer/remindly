@@ -1,5 +1,7 @@
 # How do you share behavior across classes when a class can only extend one parent? (TypeScript mixins)
 
+tags: typescript
+
 **The problem:** a class can only `extends` one parent, but you often want one class to pull in capabilities from several independent sources (jumping, ducking, serializing...). Single inheritance can't express that. **Mixins** are the workaround — reusable bundles of behavior you graft onto a class.
 
 **The solution in TypeScript:** grafting a mixin onto a class means updating it on two layers that must stay in sync — there's no native `mixin` keyword to do it for you.

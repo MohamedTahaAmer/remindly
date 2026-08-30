@@ -1,9 +1,9 @@
 import { readdir, readFile } from "node:fs/promises"
 import { join } from "node:path"
 import { config } from "dotenv"
-import { eq } from "drizzle-orm"
+import { and, eq, inArray } from "drizzle-orm"
 import { db } from "#/db"
-import { cards } from "#/db/schema"
+import { cardTags, cards, tags } from "#/db/schema"
 
 config({ path: [".env.local", ".env"] })
 
@@ -11,12 +11,15 @@ type SeedCard = {
 	front: string
 	back: string
 	detailsMarkdown: string | null
+	tags: string[]
 }
 
 const CONTENT_DIR = join(process.cwd(), "content")
 
 // File format:
 //   # <front — inline markdown title>
+//
+//   tags: <comma-separated tag names — optional>
 //
 //   <back paragraph(s)>
 //
@@ -33,7 +36,22 @@ function parseCard(source: string, filename: string): SeedCard {
 	if (!titleMatch) throw new Error(`${filename}: first non-blank line must be '# <front>'`)
 	const front = titleMatch[1]
 
-	const rest = lines.slice(firstNonBlank + 1)
+	let rest = lines.slice(firstNonBlank + 1)
+
+	// Optional "tags: a, b, c" line directly under the title (blank lines allowed in between).
+	let tagNames: string[] = []
+	const tagsLineIdx = rest.findIndex((l) => l.trim() !== "")
+	if (tagsLineIdx !== -1) {
+		const tagsMatch = /^tags:\s*(.+)$/i.exec(rest[tagsLineIdx].trim())
+		if (tagsMatch) {
+			tagNames = tagsMatch[1]
+				.split(",")
+				.map((t) => t.trim().toLowerCase())
+				.filter(Boolean)
+			rest = rest.slice(tagsLineIdx + 1)
+		}
+	}
+
 	const sepIdx = rest.findIndex((l) => /^---\s*$/.test(l))
 
 	const backLines = sepIdx === -1 ? rest : rest.slice(0, sepIdx)
@@ -44,7 +62,35 @@ function parseCard(source: string, filename: string): SeedCard {
 
 	if (!back) throw new Error(`${filename}: missing 'back' section between title and '---'`)
 
-	return { front, back, detailsMarkdown: details || null }
+	return { front, back, detailsMarkdown: details || null, tags: tagNames }
+}
+
+// Get-or-create each tag name, returning its id.
+async function ensureTags(names: string[]): Promise<Map<string, number>> {
+	const ids = new Map<string, number>()
+	for (const name of names) {
+		const [existing] = await db.select({ id: tags.id }).from(tags).where(eq(tags.name, name)).limit(1)
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- empty rowsets are real
+		if (existing?.id) {
+			ids.set(name, existing.id)
+		} else {
+			const [res] = await db.insert(tags).values({ name }).$returningId()
+			ids.set(name, res.id)
+			console.log(`Created tag "${name}" (#${res.id})`)
+		}
+	}
+	return ids
+}
+
+// Make the card's tag links match the file's tags exactly.
+async function syncCardTags(cardId: number, tagIds: number[]) {
+	const existing = await db.select({ tagId: cardTags.tagId }).from(cardTags).where(eq(cardTags.cardId, cardId))
+	const have = new Set(existing.map((r) => r.tagId))
+	const want = new Set(tagIds)
+	const toAdd = tagIds.filter((id) => !have.has(id))
+	const toRemove = [...have].filter((id) => !want.has(id))
+	if (toAdd.length) await db.insert(cardTags).values(toAdd.map((tagId) => ({ cardId, tagId })))
+	if (toRemove.length) await db.delete(cardTags).where(and(eq(cardTags.cardId, cardId), inArray(cardTags.tagId, toRemove)))
 }
 
 // Content files are named NNNN_slug.md (4-digit number, then the slug).
@@ -69,12 +115,17 @@ console.log(`Found ${seeds.length} card(s) in ${CONTENT_DIR}`)
 let inserted = 0
 let updated = 0
 
+const allTagNames = [...new Set(seeds.flatMap((s) => s.tags))]
+const tagIdsByName = await ensureTags(allTagNames)
+
 for (const c of seeds) {
 	const [existing] = await db.select({ id: cards.id }).from(cards).where(eq(cards.front, c.front)).limit(1)
 
+	let cardId: number
 	// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- tidb-serverless types select rows as non-nullable, but the array can be empty
 	if (existing?.id) {
 		await db.update(cards).set({ back: c.back, detailsMarkdown: c.detailsMarkdown }).where(eq(cards.id, existing.id))
+		cardId = existing.id
 		console.log(`Updated card #${existing.id}: ${c.front}`)
 		updated++
 	} else {
@@ -86,9 +137,15 @@ for (const c of seeds) {
 				detailsMarkdown: c.detailsMarkdown,
 			})
 			.$returningId()
+		cardId = res.id
 		console.log(`Inserted card #${res.id}: ${c.front}`)
 		inserted++
 	}
+
+	await syncCardTags(
+		cardId,
+		c.tags.map((name) => tagIdsByName.get(name)!),
+	)
 }
 
 console.log(`\nDone. ${inserted} inserted, ${updated} updated.`)

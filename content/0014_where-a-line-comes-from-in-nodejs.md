@@ -1,5 +1,7 @@
 # Where does a "line" actually come from when reading a text file in Node.js?
 
+tags: nodejs
+
 Nowhere below JavaScript — the kernel only knows "read N bytes at offset X". `fs.createReadStream` pulls 64 KB chunks (its default `highWaterMark`), one `read(2)` per _chunk_, not per line; `string_decoder` turns the bytes into UTF‑8 text while holding back multibyte characters that straddle a chunk boundary; and `readline` scans for `\n`, buffering the trailing partial line and emitting one `'line'` event per complete line. A 1,000-line, 100 KB file costs about two reads through the whole kernel stack and 1,000 events in JS.
 
 ---

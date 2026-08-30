@@ -1,5 +1,7 @@
 # Why can't epoll make regular-file I/O asynchronous?
 
+tags: nodejs, os
+
 epoll (like `select`/`poll`) is a _readiness_ API: "tell me when this fd has data." A regular file is _always_ readable — `epoll_ctl` on one even returns `EPERM`. The blocking doesn't happen at "is data available?"; it happens _inside_ `read(2)` while the disk seeks. Readiness is meaningless for files, so the model that lets one thread juggle 100k sockets simply cannot express "the disk is slow" — which is why Node fakes async file I/O with a thread pool instead.
 
 ---

@@ -1,5 +1,7 @@
 # What are Playwright projects, and why do they turn a test suite into a dependency graph?
 
+tags: playwright, testing
+
 A **project** is a named config block inside `playwright.config.ts` with its own settings (browser, `testMatch`/`testDir`, `storageState`) and, critically, its own `dependencies` on other projects. Playwright builds a **directed acyclic graph** from those edges and guarantees order: if `setup` runs before `chromium` and `firefox`, declare `dependencies: ['setup']` on each — and if `setup` fails, its dependents are _skipped_, not run. This replaces fragile `beforeAll`/`globalSetup` ordering with a structural graph: roots run first, independent nodes run in parallel, and `teardown` projects run after their dependents finish.
 
 Source: [Playwright Projects — Steve Kinney](https://stevekinney.com/courses/self-testing-ai-agents/playwright-projects)

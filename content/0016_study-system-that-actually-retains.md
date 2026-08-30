@@ -1,5 +1,7 @@
 # What's the study system that actually makes material stick (vs. rereading)?
 
+tags: learning
+
 Rereading feels productive but only builds recognition, not recall — the "fluency illusion." The system that works: **pretest** before learning, **actively recall** after (closed notes, from scratch), review with **spaced repetition** at expanding intervals (1 day → 3 days → 1 week → 2 weeks), **interleave** topics instead of studying in blocks, and **explain out loud while walking** (Feynman technique + dual coding). It's uncomfortable by design — the difficulty is what makes it work.
 
 ---

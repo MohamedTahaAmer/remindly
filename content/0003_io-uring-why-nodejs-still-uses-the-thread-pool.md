@@ -1,5 +1,7 @@
 # What is io_uring, and why doesn't Node.js use it for file I/O today?
 
+tags: nodejs, os
+
 io*uring (Linux 5.1, 2019) is the kernel's \_completion-based* async I/O API: two ring buffers shared between userspace and kernel — you write "read fd 12, 4096 bytes, offset 0" into the submission queue, the kernel writes the result into the completion queue when the DMA finishes. No thread ever blocks, so no thread pool is needed. Node 20.3.0 (libuv 1.45) shipped it for fs ops with ~8x microbenchmark wins — then CVE-2024-22017 (io_uring's kernel worker threads kept old credentials after `setuid()` dropped privileges) got it disabled in Feb 2024, and libuv 1.49 removed the `UV_USE_IO_URING` escape hatch entirely. Every current Node line (20/22/24 LTS, 25) does file I/O on the thread pool.
 
 ---

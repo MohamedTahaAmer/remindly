@@ -14,6 +14,8 @@ Each card is one `.md` file in `content/`. The seed parser (`scripts/seed.ts`) r
 ```markdown
 # <front — the question/title, inline markdown, single line>
 
+tags: <comma-separated tag names — optional, lowercase>
+
 <back — the short answer paragraph(s)>
 
 ---
@@ -24,6 +26,7 @@ Each card is one `.md` file in `content/`. The seed parser (`scripts/seed.ts`) r
 Rules the parser enforces (don't violate them):
 
 - First non-blank line **must** be `# <front>`. The text after `# ` becomes the card's `front`.
+- An optional `tags: a, b, c` line may follow the title (first non-blank line after it). The seed creates missing tags and syncs the card's tag links to exactly this list. Prefer reusing existing tag names (check other files in `content/`) over inventing near-duplicates; lowercase, short, topic-like (`nodejs`, `typescript`, `testing`).
 - The text between the title and the `---` separator becomes `back`. It is **required** — never leave it empty.
 - Everything after the first `---` line becomes `detailsMarkdown` (optional). Omit the `---` and details entirely if there's nothing more to add.
 - `front` ≤ 500 chars (it's a `varchar(500)`); `back` and details are `text`, so no practical length limit.

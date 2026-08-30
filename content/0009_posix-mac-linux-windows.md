@@ -1,5 +1,7 @@
 # Why are macOS and Linux closer to each other than to Windows?
 
+tags: os
+
 Both macOS and Linux are POSIX-compliant Unix-like systems sharing the same lineage (Unix → BSD/System V), so they share the same syscalls, filesystem semantics, shell, and command-line tools. Windows descends from a separate DOS/NT codebase with different APIs (Win32), filesystem rules (drive letters, case-insensitive), and conventions.
 
 ---

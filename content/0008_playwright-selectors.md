@@ -1,5 +1,7 @@
 # What are the Playwright selectors, which is recommended, and what are their trade-offs?
 
+tags: playwright, testing
+
 Prefer **user-facing locators** in this order: `getByRole` → `getByLabel` / `getByPlaceholder` → `getByText` → `getByTestId`, and use CSS/XPath only as a last resort. Role-based queries are the recommended default because they assert what the user (and assistive tech) actually perceives, so they survive refactors and break only when behavior changes.
 
 ---

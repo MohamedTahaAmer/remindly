@@ -3,6 +3,7 @@ import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { TanStackDevtools } from "@tanstack/react-devtools"
 
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools"
+import { TagSidebar } from "#/components/TagSidebar"
 import { ThemeToggle } from "#/components/ThemeToggle"
 import { THEME_INIT_SCRIPT } from "#/lib/theme"
 
@@ -63,7 +64,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 						</div>
 					</div>
 				</nav>
-				<main className="max-w-6xl mx-auto px-6 py-8">{children}</main>
+				<div className="max-w-6xl mx-auto px-6 py-8 flex gap-8 items-start">
+					<TagSidebar />
+					<main className="flex-1 min-w-0">{children}</main>
+				</div>
 				<TanStackDevtools
 					config={{ position: "bottom-right" }}
 					plugins={[{ name: "Tanstack Router", render: <TanStackRouterDevtoolsPanel /> }, TanStackQueryDevtools]}

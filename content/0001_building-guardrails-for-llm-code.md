@@ -1,5 +1,7 @@
 # In the LLM era, what is the job — writing code or building guardrails?
 
+tags: ai
+
 Increasingly the work isn't typing code, it's building the **systems and guardrails** (tests, types, linters, reviews, CI) that raise the quality of LLM-written code. The LLM produces the lines; your harness guarantees they're worth keeping. "High quality" means four things at once: **working, performant, secure, and readable.**
 
 ---

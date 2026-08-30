@@ -1,5 +1,7 @@
 # Why isn't 100% test coverage practical (e.g. testing Google OAuth)?
 
+tags: testing
+
 Some code shouldn't be tested. Google OAuth is a third-party service, it actively blocks automated logins (so tests become a cat-and-mouse game), and chasing 100% coverage pushes you to stop mocking external services — which explodes the complexity of the test setup. Coverage is a tool, not a goal.
 
 ---

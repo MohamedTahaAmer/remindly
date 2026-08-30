@@ -1,5 +1,7 @@
 # Why can't a TS `interface` be assigned to `Record<string, X>`?
 
+tags: typescript
+
 Interfaces support declaration merging, so TS can't prove every possible key conforms to the index signature. Spread into a fresh object literal (`{ ...obj }`), use a `type` alias, or add an explicit index signature.
 
 ---
