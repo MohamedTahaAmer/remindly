@@ -5,7 +5,6 @@ export const Route = createFileRoute("/api/video-agent/$id/export")({
 	server: {
 		handlers: {
 			GET: ({ params }) => videoAgentController.downloadExport(params.id),
-			POST: ({ request, params }) => videoAgentController.startExport(request, params.id),
 		},
 	},
 })

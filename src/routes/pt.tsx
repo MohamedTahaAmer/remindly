@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Check, Maximize2, Trash2 } from "lucide-react"
+import { useTRPC } from "#/integrations/trpc/react"
 import { copyToClipboard } from "#/lib/clipboard"
 
 export const Route = createFileRoute("/pt")({
@@ -11,16 +13,17 @@ export const Route = createFileRoute("/pt")({
 type PastedText = { id: number; text: string; createdAt: string }
 
 function PasteTexts() {
-	const [texts, setTexts] = useState<Array<PastedText>>([])
+	const trpc = useTRPC()
+	const queryClient = useQueryClient()
+	const { data: texts = [] } = useQuery(trpc.pastedTexts.list.queryOptions())
+	const invalidateList = () => queryClient.invalidateQueries(trpc.pastedTexts.list.queryFilter())
+	const createText = useMutation(trpc.pastedTexts.create.mutationOptions({ onSuccess: invalidateList }))
+	const deleteText = useMutation(trpc.pastedTexts.delete.mutationOptions({ onSuccess: invalidateList }))
+
 	const [status, setStatus] = useState<string | null>(null)
 	const [copied, setCopied] = useState<number | null>(null)
 	const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 	const statusTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-	async function refresh() {
-		const res = await fetch("/api/pasted-texts")
-		setTexts(await res.json())
-	}
 
 	function flashStatus(text: string, ms = 3000) {
 		if (statusTimer.current) clearTimeout(statusTimer.current)
@@ -28,9 +31,11 @@ function PasteTexts() {
 		statusTimer.current = setTimeout(() => setStatus(null), ms)
 	}
 
-	useEffect(() => {
-		refresh()
+	// keep the paste listener's closure pointing at the latest render's mutation
+	const createRef = useRef(createText)
+	createRef.current = createText
 
+	useEffect(() => {
 		// global watcher: Ctrl+V anywhere on the page saves the clipboard text
 		async function onPaste(e: ClipboardEvent) {
 			const text = e.clipboardData?.getData("text/plain") ?? ""
@@ -38,13 +43,7 @@ function PasteTexts() {
 			e.preventDefault()
 
 			try {
-				const res = await fetch("/api/pasted-texts", {
-					method: "POST",
-					headers: { "content-type": "text/plain; charset=utf-8" },
-					body: text,
-				})
-				if (!res.ok) throw new Error(`save failed: ${res.status}`)
-				await refresh()
+				await createRef.current.mutateAsync({ text })
 				flashStatus("Saved ✓")
 			} catch {
 				flashStatus("Save failed", 8000)
@@ -64,11 +63,6 @@ function PasteTexts() {
 	async function copyText(item: PastedText) {
 		await copyToClipboard(item.text)
 		flashCopied(item.id)
-	}
-
-	async function deleteText(id: number) {
-		const res = await fetch(`/pasted-texts/${id}`, { method: "DELETE" })
-		if (res.ok) setTexts((prev) => prev.filter((t) => t.id !== id))
 	}
 
 	return (
@@ -103,7 +97,7 @@ function PasteTexts() {
 							</a>
 							<button
 								type="button"
-								onClick={() => deleteText(item.id)}
+								onClick={() => deleteText.mutate({ id: item.id })}
 								aria-label="Delete text"
 								className="absolute top-1 left-1 rounded-md bg-black/60 text-white p-1.5 transition hover:bg-red-600/90 opacity-0 group-hover:opacity-100"
 							>

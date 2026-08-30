@@ -1,42 +1,26 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useMemo, useRef, useState } from "react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { ArrowLeft, Download, Loader2, Pause, Play, Scissors, Sparkles, Trash2, Upload, X } from "lucide-react"
 import { Button } from "#/components/ui/button"
 import { Switch } from "#/components/ui/switch"
+import { useTRPC } from "#/integrations/trpc/react"
+import { trpcClient } from "#/integrations/tanstack-query/root-provider"
 import { cn } from "#/lib/utils"
+import type { AiCut, ProjectState, Span, Word } from "#/server/modules/video-agent/schema/video-agent.schema"
 
 export const Route = createFileRoute("/video-agent")({
 	component: VideoAgent,
 	ssr: false,
 })
 
-// ── types mirrored from scripts/vite-plugin-video-agent.ts ──
-
-type Word = { text: string; start: number; end: number; confidence: number }
-type Span = { start: number; end: number }
-type AiCut = { firstWord: number; lastWord: number; reason: string; text: string; confidence: string; start: number; end: number }
-type ProjectState = {
-	id: string
-	name: string
-	createdAt: string
-	status: "processing" | "ready" | "error"
-	step: "saving" | "probing" | "extracting-audio" | "detecting-silence" | "transcribing" | "done"
-	error?: string
-	duration: number
-	hasAudio: boolean
-	silences: Array<Span>
-	words: Array<Word> | null
-	transcriptError?: string
-	analysis?: { cuts: Array<AiCut>; flagged: boolean; at: string }
-	export: { status: "none" | "rendering" | "ready" | "error"; error?: string }
-}
-type ProjectSummary = { id: string; name: string; status: ProjectState["status"]; duration: number; createdAt: string }
+// Only the byte streams stay on raw HTTP (upload, <video> source, download);
+// everything JSON-shaped goes through tRPC.
+const API = "/api/video-agent"
+const FILLER_RE = /^(u+m+|u+h+|er+m*|hm+m*|mhm+)[.,!?;:]*$/i
 
 type CutKind = "silence" | "filler" | "ai"
 type Cut = { id: string; kind: CutKind; start: number; end: number; label: string; enabled: boolean; firstWord?: number; lastWord?: number }
-
-const API = "/api/video-agent"
-const FILLER_RE = /^(u+m+|u+h+|er+m*|hm+m*|mhm+)[.,!?;:]*$/i
 
 function formatTime(seconds: number): string {
 	const s = Math.max(0, Math.floor(seconds))
@@ -54,6 +38,19 @@ function mergeSpans(spans: Array<Span>): Array<Span> {
 	return merged
 }
 
+function aiCutToCut(c: AiCut, i: number, enabled: boolean): Cut {
+	return {
+		id: `ai-${i}`,
+		kind: "ai",
+		start: c.start,
+		end: c.end,
+		label: `${c.reason.replaceAll("_", " ")}: "${c.text}"`,
+		enabled,
+		firstWord: c.firstWord,
+		lastWord: c.lastWord,
+	}
+}
+
 function buildCuts(state: ProjectState): Array<Cut> {
 	const cuts: Array<Cut> = []
 	state.silences.forEach((s, i) => {
@@ -65,18 +62,7 @@ function buildCuts(state: ProjectState): Array<Cut> {
 		if (FILLER_RE.test(w.text))
 			cuts.push({ id: `fil-${i}`, kind: "filler", start: w.start - 0.04, end: w.end + 0.04, label: `"${w.text}"`, enabled: false, firstWord: i, lastWord: i })
 	})
-	state.analysis?.cuts.forEach((c, i) => {
-		cuts.push({
-			id: `ai-${i}`,
-			kind: "ai",
-			start: c.start,
-			end: c.end,
-			label: `${c.reason.replaceAll("_", " ")}: "${c.text}"`,
-			enabled: !state.analysis?.flagged,
-			firstWord: c.firstWord,
-			lastWord: c.lastWord,
-		})
-	})
+	state.analysis?.cuts.forEach((c, i) => cuts.push(aiCutToCut(c, i, !state.analysis?.flagged)))
 	return cuts
 }
 
@@ -94,19 +80,18 @@ function VideoAgent() {
 // ── library: upload zone + project list ──
 
 function Library({ onOpen }: { onOpen: (id: string) => void }) {
-	const [projects, setProjects] = useState<Array<ProjectSummary>>([])
+	const trpc = useTRPC()
+	const queryClient = useQueryClient()
+	const { data: projects = [] } = useQuery(trpc.videoAgent.list.queryOptions())
+	const deleteProject = useMutation(
+		trpc.videoAgent.delete.mutationOptions({
+			onSuccess: () => queryClient.invalidateQueries(trpc.videoAgent.list.queryFilter()),
+		}),
+	)
 	const [progress, setProgress] = useState<number | null>(null)
 	const [error, setError] = useState<string | null>(null)
 	const [dragging, setDragging] = useState(false)
 	const fileInput = useRef<HTMLInputElement>(null)
-
-	async function refresh() {
-		const res = await fetch(`${API}/list`)
-		if (res.ok) setProjects(await res.json())
-	}
-	useEffect(() => {
-		refresh()
-	}, [])
 
 	function upload(file: File) {
 		setError(null)
@@ -126,11 +111,6 @@ function Library({ onOpen }: { onOpen: (id: string) => void }) {
 			setError("upload failed")
 		}
 		xhr.send(file)
-	}
-
-	async function remove(id: string) {
-		await fetch(`${API}/${id}`, { method: "DELETE" })
-		refresh()
 	}
 
 	return (
@@ -200,7 +180,7 @@ function Library({ onOpen }: { onOpen: (id: string) => void }) {
 							>
 								{p.status}
 							</span>
-							<Button variant="ghost" size="icon-sm" aria-label="Delete project" onClick={() => remove(p.id)}>
+							<Button variant="ghost" size="icon-sm" aria-label="Delete project" onClick={() => deleteProject.mutate({ id: p.id })}>
 								<Trash2 />
 							</Button>
 						</li>
@@ -222,29 +202,10 @@ const STEP_LABELS: Array<[ProjectState["step"], string]> = [
 ]
 
 function Project({ id, onBack }: { id: string; onBack: () => void }) {
-	const [state, setState] = useState<ProjectState | null>(null)
-
-	useEffect(() => {
-		let stopped = false
-		let timer: ReturnType<typeof setTimeout>
-		async function poll() {
-			try {
-				const res = await fetch(`${API}/${id}/state`)
-				if (!res.ok) throw new Error()
-				const next: ProjectState = await res.json()
-				if (stopped) return
-				setState(next)
-				if (next.status === "processing") timer = setTimeout(poll, 1500)
-			} catch {
-				if (!stopped) timer = setTimeout(poll, 1500)
-			}
-		}
-		poll()
-		return () => {
-			stopped = true
-			clearTimeout(timer)
-		}
-	}, [id])
+	const trpc = useTRPC()
+	const { data: state, error } = useQuery(
+		trpc.videoAgent.state.queryOptions({ id }, { refetchInterval: (query) => (query.state.data?.status === "processing" ? 1500 : false) }),
+	)
 
 	const back = (
 		<Button variant="ghost" size="sm" onClick={onBack}>
@@ -252,7 +213,15 @@ function Project({ id, onBack }: { id: string; onBack: () => void }) {
 		</Button>
 	)
 
-	if (state === null)
+	if (error)
+		return (
+			<div className="space-y-4">
+				{back}
+				<p className="text-sm text-destructive">{error.message}</p>
+			</div>
+		)
+
+	if (!state)
 		return (
 			<div className="space-y-4">
 				{back}
@@ -301,13 +270,15 @@ function Project({ id, onBack }: { id: string; onBack: () => void }) {
 
 function Editor({ state, onBack }: { state: ProjectState; onBack: () => void }) {
 	const { id, duration } = state
+	const trpc = useTRPC()
+	const analyzeMutation = useMutation(trpc.videoAgent.analyze.mutationOptions())
+	const startExportMutation = useMutation(trpc.videoAgent.startExport.mutationOptions())
 	const videoRef = useRef<HTMLVideoElement>(null)
 	const playheadRef = useRef<HTMLDivElement>(null)
 	const [cuts, setCuts] = useState<Array<Cut>>(() => buildCuts(state))
 	const [playing, setPlaying] = useState(false)
 	const [time, setTime] = useState(0)
 	const [skipCuts, setSkipCuts] = useState(true)
-	const [analyzing, setAnalyzing] = useState(false)
 	const [exporting, setExporting] = useState(false)
 	const [banner, setBanner] = useState<string | null>(null)
 	const [transcriptBanner, setTranscriptBanner] = useState<string | null>(state.transcriptError ?? null)
@@ -373,32 +344,14 @@ function Editor({ state, onBack }: { state: ProjectState; onBack: () => void }) 
 	}
 
 	async function findMistakes() {
-		setAnalyzing(true)
 		setBanner(null)
 		try {
-			const res = await fetch(`${API}/${id}/analyze`, { method: "POST" })
-			const data = await res.json()
-			if (!res.ok) throw new Error(data.error ?? `analyze failed (${res.status})`)
-			const { cuts: aiCuts, flagged } = data as { cuts: Array<AiCut>; flagged: boolean }
-			setCuts((prev) => [
-				...prev.filter((c) => c.kind !== "ai"),
-				...aiCuts.map((c, i) => ({
-					id: `ai-${i}`,
-					kind: "ai" as const,
-					start: c.start,
-					end: c.end,
-					label: `${c.reason.replaceAll("_", " ")}: "${c.text}"`,
-					enabled: !flagged,
-					firstWord: c.firstWord,
-					lastWord: c.lastWord,
-				})),
-			])
+			const { cuts: aiCuts, flagged } = await analyzeMutation.mutateAsync({ id })
+			setCuts((prev) => [...prev.filter((c) => c.kind !== "ai"), ...aiCuts.map((c, i) => aiCutToCut(c, i, !flagged))])
 			if (flagged) setBanner("AI wants to cut >40% of the video — review the violet cuts before enabling them.")
 			else if (aiCuts.length === 0) setBanner("AI found no mistakes to cut.")
 		} catch (err) {
 			setBanner((err as Error).message)
-		} finally {
-			setAnalyzing(false)
 		}
 	}
 
@@ -406,18 +359,10 @@ function Editor({ state, onBack }: { state: ProjectState; onBack: () => void }) 
 		setExporting(true)
 		setBanner(null)
 		try {
-			const res = await fetch(`${API}/${id}/export`, {
-				method: "POST",
-				headers: { "content-type": "application/json" },
-				body: JSON.stringify({ cuts: enabledMerged }),
-			})
-			const data = await res.json()
-			if (!res.ok) throw new Error(data.error ?? `export failed (${res.status})`)
+			await startExportMutation.mutateAsync({ id, cuts: enabledMerged })
 			for (;;) {
 				await new Promise((resolve) => setTimeout(resolve, 1500))
-				const poll = await fetch(`${API}/${id}/state`)
-				if (!poll.ok) continue
-				const next: ProjectState = await poll.json()
+				const next = await trpcClient.videoAgent.state.query({ id })
 				if (next.export.status === "ready") {
 					window.location.href = `${API}/${id}/export`
 					break
@@ -530,8 +475,8 @@ function Editor({ state, onBack }: { state: ProjectState; onBack: () => void }) 
 						<Sparkles /> Mistakes ({counts.ai})
 					</Button>
 				) : (
-					<Button variant="outline" size="sm" disabled={analyzing || !state.words} onClick={findMistakes}>
-						{analyzing ? <Loader2 className="animate-spin" /> : <Sparkles />} {analyzing ? "Analyzing…" : "Find mistakes"}
+					<Button variant="outline" size="sm" disabled={analyzeMutation.isPending || !state.words} onClick={findMistakes}>
+						{analyzeMutation.isPending ? <Loader2 className="animate-spin" /> : <Sparkles />} {analyzeMutation.isPending ? "Analyzing…" : "Find mistakes"}
 					</Button>
 				)}
 				<Button size="sm" className="ml-auto" disabled={exporting} onClick={exportVideo}>

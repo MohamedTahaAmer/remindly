@@ -20,19 +20,14 @@ import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-qu
 import { Route as DemoTableRouteImport } from './routes/demo/table'
 import { Route as CardsNewRouteImport } from './routes/cards.new'
 import { Route as CardsIdRouteImport } from './routes/cards.$id'
-import { Route as ApiPastedTextsRouteImport } from './routes/api.pasted-texts'
 import { Route as ApiPastedImagesRouteImport } from './routes/api.pasted-images'
 import { Route as DemoFormSimpleRouteImport } from './routes/demo/form.simple'
 import { Route as DemoFormAddressRouteImport } from './routes/demo/form.address'
 import { Route as CardsIdEditRouteImport } from './routes/cards.$id_.edit'
 import { Route as ApiVideoAgentUploadRouteImport } from './routes/api.video-agent.upload'
-import { Route as ApiVideoAgentListRouteImport } from './routes/api.video-agent.list'
-import { Route as ApiVideoAgentIdRouteImport } from './routes/api.video-agent.$id'
 import { Route as ApiTrpcSplatRouteImport } from './routes/api.trpc.$'
 import { Route as ApiVideoAgentIdVideoRouteImport } from './routes/api.video-agent.$id.video'
-import { Route as ApiVideoAgentIdStateRouteImport } from './routes/api.video-agent.$id.state'
 import { Route as ApiVideoAgentIdExportRouteImport } from './routes/api.video-agent.$id.export'
-import { Route as ApiVideoAgentIdAnalyzeRouteImport } from './routes/api.video-agent.$id.analyze'
 
 const VideoAgentRoute = VideoAgentRouteImport.update({
   id: '/video-agent',
@@ -89,11 +84,6 @@ const CardsIdRoute = CardsIdRouteImport.update({
   path: '/cards/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPastedTextsRoute = ApiPastedTextsRouteImport.update({
-  id: '/api/pasted-texts',
-  path: '/api/pasted-texts',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiPastedImagesRoute = ApiPastedImagesRouteImport.update({
   id: '/api/pasted-images',
   path: '/api/pasted-images',
@@ -119,40 +109,20 @@ const ApiVideoAgentUploadRoute = ApiVideoAgentUploadRouteImport.update({
   path: '/api/video-agent/upload',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiVideoAgentListRoute = ApiVideoAgentListRouteImport.update({
-  id: '/api/video-agent/list',
-  path: '/api/video-agent/list',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiVideoAgentIdRoute = ApiVideoAgentIdRouteImport.update({
-  id: '/api/video-agent/$id',
-  path: '/api/video-agent/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
   id: '/api/trpc/$',
   path: '/api/trpc/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiVideoAgentIdVideoRoute = ApiVideoAgentIdVideoRouteImport.update({
-  id: '/video',
-  path: '/video',
-  getParentRoute: () => ApiVideoAgentIdRoute,
-} as any)
-const ApiVideoAgentIdStateRoute = ApiVideoAgentIdStateRouteImport.update({
-  id: '/state',
-  path: '/state',
-  getParentRoute: () => ApiVideoAgentIdRoute,
+  id: '/api/video-agent/$id/video',
+  path: '/api/video-agent/$id/video',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiVideoAgentIdExportRoute = ApiVideoAgentIdExportRouteImport.update({
-  id: '/export',
-  path: '/export',
-  getParentRoute: () => ApiVideoAgentIdRoute,
-} as any)
-const ApiVideoAgentIdAnalyzeRoute = ApiVideoAgentIdAnalyzeRouteImport.update({
-  id: '/analyze',
-  path: '/analyze',
-  getParentRoute: () => ApiVideoAgentIdRoute,
+  id: '/api/video-agent/$id/export',
+  path: '/api/video-agent/$id/export',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -161,7 +131,6 @@ export interface FileRoutesByFullPath {
   '/pt': typeof PtRoute
   '/video-agent': typeof VideoAgentRoute
   '/api/pasted-images': typeof ApiPastedImagesRoute
-  '/api/pasted-texts': typeof ApiPastedTextsRoute
   '/cards/$id': typeof CardsIdRoute
   '/cards/new': typeof CardsNewRoute
   '/demo/table': typeof DemoTableRoute
@@ -170,15 +139,11 @@ export interface FileRoutesByFullPath {
   '/pasted-texts/$id': typeof PastedTextsIdRoute
   '/cards/': typeof CardsIndexRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
-  '/api/video-agent/$id': typeof ApiVideoAgentIdRouteWithChildren
-  '/api/video-agent/list': typeof ApiVideoAgentListRoute
   '/api/video-agent/upload': typeof ApiVideoAgentUploadRoute
   '/cards/$id/edit': typeof CardsIdEditRoute
   '/demo/form/address': typeof DemoFormAddressRoute
   '/demo/form/simple': typeof DemoFormSimpleRoute
-  '/api/video-agent/$id/analyze': typeof ApiVideoAgentIdAnalyzeRoute
   '/api/video-agent/$id/export': typeof ApiVideoAgentIdExportRoute
-  '/api/video-agent/$id/state': typeof ApiVideoAgentIdStateRoute
   '/api/video-agent/$id/video': typeof ApiVideoAgentIdVideoRoute
 }
 export interface FileRoutesByTo {
@@ -187,7 +152,6 @@ export interface FileRoutesByTo {
   '/pt': typeof PtRoute
   '/video-agent': typeof VideoAgentRoute
   '/api/pasted-images': typeof ApiPastedImagesRoute
-  '/api/pasted-texts': typeof ApiPastedTextsRoute
   '/cards/$id': typeof CardsIdRoute
   '/cards/new': typeof CardsNewRoute
   '/demo/table': typeof DemoTableRoute
@@ -196,15 +160,11 @@ export interface FileRoutesByTo {
   '/pasted-texts/$id': typeof PastedTextsIdRoute
   '/cards': typeof CardsIndexRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
-  '/api/video-agent/$id': typeof ApiVideoAgentIdRouteWithChildren
-  '/api/video-agent/list': typeof ApiVideoAgentListRoute
   '/api/video-agent/upload': typeof ApiVideoAgentUploadRoute
   '/cards/$id/edit': typeof CardsIdEditRoute
   '/demo/form/address': typeof DemoFormAddressRoute
   '/demo/form/simple': typeof DemoFormSimpleRoute
-  '/api/video-agent/$id/analyze': typeof ApiVideoAgentIdAnalyzeRoute
   '/api/video-agent/$id/export': typeof ApiVideoAgentIdExportRoute
-  '/api/video-agent/$id/state': typeof ApiVideoAgentIdStateRoute
   '/api/video-agent/$id/video': typeof ApiVideoAgentIdVideoRoute
 }
 export interface FileRoutesById {
@@ -214,7 +174,6 @@ export interface FileRoutesById {
   '/pt': typeof PtRoute
   '/video-agent': typeof VideoAgentRoute
   '/api/pasted-images': typeof ApiPastedImagesRoute
-  '/api/pasted-texts': typeof ApiPastedTextsRoute
   '/cards/$id': typeof CardsIdRoute
   '/cards/new': typeof CardsNewRoute
   '/demo/table': typeof DemoTableRoute
@@ -223,15 +182,11 @@ export interface FileRoutesById {
   '/pasted-texts/$id': typeof PastedTextsIdRoute
   '/cards/': typeof CardsIndexRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
-  '/api/video-agent/$id': typeof ApiVideoAgentIdRouteWithChildren
-  '/api/video-agent/list': typeof ApiVideoAgentListRoute
   '/api/video-agent/upload': typeof ApiVideoAgentUploadRoute
   '/cards/$id_/edit': typeof CardsIdEditRoute
   '/demo/form/address': typeof DemoFormAddressRoute
   '/demo/form/simple': typeof DemoFormSimpleRoute
-  '/api/video-agent/$id/analyze': typeof ApiVideoAgentIdAnalyzeRoute
   '/api/video-agent/$id/export': typeof ApiVideoAgentIdExportRoute
-  '/api/video-agent/$id/state': typeof ApiVideoAgentIdStateRoute
   '/api/video-agent/$id/video': typeof ApiVideoAgentIdVideoRoute
 }
 export interface FileRouteTypes {
@@ -242,7 +197,6 @@ export interface FileRouteTypes {
     | '/pt'
     | '/video-agent'
     | '/api/pasted-images'
-    | '/api/pasted-texts'
     | '/cards/$id'
     | '/cards/new'
     | '/demo/table'
@@ -251,15 +205,11 @@ export interface FileRouteTypes {
     | '/pasted-texts/$id'
     | '/cards/'
     | '/api/trpc/$'
-    | '/api/video-agent/$id'
-    | '/api/video-agent/list'
     | '/api/video-agent/upload'
     | '/cards/$id/edit'
     | '/demo/form/address'
     | '/demo/form/simple'
-    | '/api/video-agent/$id/analyze'
     | '/api/video-agent/$id/export'
-    | '/api/video-agent/$id/state'
     | '/api/video-agent/$id/video'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -268,7 +218,6 @@ export interface FileRouteTypes {
     | '/pt'
     | '/video-agent'
     | '/api/pasted-images'
-    | '/api/pasted-texts'
     | '/cards/$id'
     | '/cards/new'
     | '/demo/table'
@@ -277,15 +226,11 @@ export interface FileRouteTypes {
     | '/pasted-texts/$id'
     | '/cards'
     | '/api/trpc/$'
-    | '/api/video-agent/$id'
-    | '/api/video-agent/list'
     | '/api/video-agent/upload'
     | '/cards/$id/edit'
     | '/demo/form/address'
     | '/demo/form/simple'
-    | '/api/video-agent/$id/analyze'
     | '/api/video-agent/$id/export'
-    | '/api/video-agent/$id/state'
     | '/api/video-agent/$id/video'
   id:
     | '__root__'
@@ -294,7 +239,6 @@ export interface FileRouteTypes {
     | '/pt'
     | '/video-agent'
     | '/api/pasted-images'
-    | '/api/pasted-texts'
     | '/cards/$id'
     | '/cards/new'
     | '/demo/table'
@@ -303,15 +247,11 @@ export interface FileRouteTypes {
     | '/pasted-texts/$id'
     | '/cards/'
     | '/api/trpc/$'
-    | '/api/video-agent/$id'
-    | '/api/video-agent/list'
     | '/api/video-agent/upload'
     | '/cards/$id_/edit'
     | '/demo/form/address'
     | '/demo/form/simple'
-    | '/api/video-agent/$id/analyze'
     | '/api/video-agent/$id/export'
-    | '/api/video-agent/$id/state'
     | '/api/video-agent/$id/video'
   fileRoutesById: FileRoutesById
 }
@@ -321,7 +261,6 @@ export interface RootRouteChildren {
   PtRoute: typeof PtRoute
   VideoAgentRoute: typeof VideoAgentRoute
   ApiPastedImagesRoute: typeof ApiPastedImagesRoute
-  ApiPastedTextsRoute: typeof ApiPastedTextsRoute
   CardsIdRoute: typeof CardsIdRoute
   CardsNewRoute: typeof CardsNewRoute
   DemoTableRoute: typeof DemoTableRoute
@@ -330,12 +269,12 @@ export interface RootRouteChildren {
   PastedTextsIdRoute: typeof PastedTextsIdRoute
   CardsIndexRoute: typeof CardsIndexRoute
   ApiTrpcSplatRoute: typeof ApiTrpcSplatRoute
-  ApiVideoAgentIdRoute: typeof ApiVideoAgentIdRouteWithChildren
-  ApiVideoAgentListRoute: typeof ApiVideoAgentListRoute
   ApiVideoAgentUploadRoute: typeof ApiVideoAgentUploadRoute
   CardsIdEditRoute: typeof CardsIdEditRoute
   DemoFormAddressRoute: typeof DemoFormAddressRoute
   DemoFormSimpleRoute: typeof DemoFormSimpleRoute
+  ApiVideoAgentIdExportRoute: typeof ApiVideoAgentIdExportRoute
+  ApiVideoAgentIdVideoRoute: typeof ApiVideoAgentIdVideoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -417,13 +356,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CardsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/pasted-texts': {
-      id: '/api/pasted-texts'
-      path: '/api/pasted-texts'
-      fullPath: '/api/pasted-texts'
-      preLoaderRoute: typeof ApiPastedTextsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/pasted-images': {
       id: '/api/pasted-images'
       path: '/api/pasted-images'
@@ -459,20 +391,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiVideoAgentUploadRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/video-agent/list': {
-      id: '/api/video-agent/list'
-      path: '/api/video-agent/list'
-      fullPath: '/api/video-agent/list'
-      preLoaderRoute: typeof ApiVideoAgentListRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/video-agent/$id': {
-      id: '/api/video-agent/$id'
-      path: '/api/video-agent/$id'
-      fullPath: '/api/video-agent/$id'
-      preLoaderRoute: typeof ApiVideoAgentIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/trpc/$': {
       id: '/api/trpc/$'
       path: '/api/trpc/$'
@@ -482,52 +400,20 @@ declare module '@tanstack/react-router' {
     }
     '/api/video-agent/$id/video': {
       id: '/api/video-agent/$id/video'
-      path: '/video'
+      path: '/api/video-agent/$id/video'
       fullPath: '/api/video-agent/$id/video'
       preLoaderRoute: typeof ApiVideoAgentIdVideoRouteImport
-      parentRoute: typeof ApiVideoAgentIdRoute
-    }
-    '/api/video-agent/$id/state': {
-      id: '/api/video-agent/$id/state'
-      path: '/state'
-      fullPath: '/api/video-agent/$id/state'
-      preLoaderRoute: typeof ApiVideoAgentIdStateRouteImport
-      parentRoute: typeof ApiVideoAgentIdRoute
+      parentRoute: typeof rootRouteImport
     }
     '/api/video-agent/$id/export': {
       id: '/api/video-agent/$id/export'
-      path: '/export'
+      path: '/api/video-agent/$id/export'
       fullPath: '/api/video-agent/$id/export'
       preLoaderRoute: typeof ApiVideoAgentIdExportRouteImport
-      parentRoute: typeof ApiVideoAgentIdRoute
-    }
-    '/api/video-agent/$id/analyze': {
-      id: '/api/video-agent/$id/analyze'
-      path: '/analyze'
-      fullPath: '/api/video-agent/$id/analyze'
-      preLoaderRoute: typeof ApiVideoAgentIdAnalyzeRouteImport
-      parentRoute: typeof ApiVideoAgentIdRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
-
-interface ApiVideoAgentIdRouteChildren {
-  ApiVideoAgentIdAnalyzeRoute: typeof ApiVideoAgentIdAnalyzeRoute
-  ApiVideoAgentIdExportRoute: typeof ApiVideoAgentIdExportRoute
-  ApiVideoAgentIdStateRoute: typeof ApiVideoAgentIdStateRoute
-  ApiVideoAgentIdVideoRoute: typeof ApiVideoAgentIdVideoRoute
-}
-
-const ApiVideoAgentIdRouteChildren: ApiVideoAgentIdRouteChildren = {
-  ApiVideoAgentIdAnalyzeRoute: ApiVideoAgentIdAnalyzeRoute,
-  ApiVideoAgentIdExportRoute: ApiVideoAgentIdExportRoute,
-  ApiVideoAgentIdStateRoute: ApiVideoAgentIdStateRoute,
-  ApiVideoAgentIdVideoRoute: ApiVideoAgentIdVideoRoute,
-}
-
-const ApiVideoAgentIdRouteWithChildren = ApiVideoAgentIdRoute._addFileChildren(
-  ApiVideoAgentIdRouteChildren,
-)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -535,7 +421,6 @@ const rootRouteChildren: RootRouteChildren = {
   PtRoute: PtRoute,
   VideoAgentRoute: VideoAgentRoute,
   ApiPastedImagesRoute: ApiPastedImagesRoute,
-  ApiPastedTextsRoute: ApiPastedTextsRoute,
   CardsIdRoute: CardsIdRoute,
   CardsNewRoute: CardsNewRoute,
   DemoTableRoute: DemoTableRoute,
@@ -544,12 +429,12 @@ const rootRouteChildren: RootRouteChildren = {
   PastedTextsIdRoute: PastedTextsIdRoute,
   CardsIndexRoute: CardsIndexRoute,
   ApiTrpcSplatRoute: ApiTrpcSplatRoute,
-  ApiVideoAgentIdRoute: ApiVideoAgentIdRouteWithChildren,
-  ApiVideoAgentListRoute: ApiVideoAgentListRoute,
   ApiVideoAgentUploadRoute: ApiVideoAgentUploadRoute,
   CardsIdEditRoute: CardsIdEditRoute,
   DemoFormAddressRoute: DemoFormAddressRoute,
   DemoFormSimpleRoute: DemoFormSimpleRoute,
+  ApiVideoAgentIdExportRoute: ApiVideoAgentIdExportRoute,
+  ApiVideoAgentIdVideoRoute: ApiVideoAgentIdVideoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

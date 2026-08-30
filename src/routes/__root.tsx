@@ -1,4 +1,4 @@
-import { HeadContent, Link, Scripts, createRootRouteWithContext } from "@tanstack/react-router"
+import { HeadContent, Link, Scripts, createRootRouteWithContext, useLocation } from "@tanstack/react-router"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { TanStackDevtools } from "@tanstack/react-devtools"
 
@@ -36,6 +36,8 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+	// The tag sidebar only lives on the home screen.
+	const pathname = useLocation({ select: (l) => l.pathname })
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<head>
@@ -74,7 +76,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 					</div>
 				</nav>
 				<div className="max-w-6xl mx-auto px-6 py-8 flex gap-8 items-start">
-					<TagSidebar />
+					{pathname === "/" && <TagSidebar />}
 					<main className="flex-1 min-w-0">{children}</main>
 				</div>
 				<TanStackDevtools

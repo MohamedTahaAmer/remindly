@@ -2,21 +2,20 @@ import fs from "node:fs"
 import path from "node:path"
 
 import { fileStream, json } from "#/server/common/helpers/http.helper"
-import { MAX_ANALYZE_WORDS, PROJECT_ID_RE, VIDEO_EXTS } from "./video-agent.constants.ts"
-import { exportInputSchema } from "./schema/video-agent.schema.ts"
+import { PROJECT_ID_RE, VIDEO_EXTS } from "./video-agent.constants.ts"
 import { videoAgentService as service } from "./video-agent.service.ts"
 import type { ProjectState } from "./schema/video-agent.schema.ts"
 
 /**
- * HTTP layer for /api/video-agent. Thin: parses requests, guards ids, builds
- * Responses; all real work lives in the service. Bound to URLs by the file
- * routes in src/routes/api.video-agent.*.
+ * Raw HTTP layer for the video-agent byte streams — the calls tRPC can't
+ * carry: the streamed binary upload, the byte-range `<video>` source, and the
+ * export download. Everything JSON-shaped lives in video-agent.router.ts.
+ * Bound to URLs by the file routes in src/routes/api.video-agent.*.
  */
 export class VideoAgentController {
 	/** The id regex is the path-traversal guard for every :id endpoint. */
 	private stateOr404(id: string): ProjectState | Response {
-		if (!PROJECT_ID_RE.test(id)) return json({ error: "unknown project" }, 404)
-		const state = service.readState(id)
+		const state = PROJECT_ID_RE.test(id) ? service.readState(id) : null
 		if (!state) return json({ error: "unknown project" }, 404)
 		return state
 	}
@@ -34,16 +33,6 @@ export class VideoAgentController {
 			service.patchState(id, { status: "error", error: err.message })
 		})
 		return json({ id })
-	}
-
-	list(): Response {
-		return json(service.list())
-	}
-
-	state(id: string): Response {
-		const state = this.stateOr404(id)
-		if (state instanceof Response) return state
-		return json(state)
 	}
 
 	video(request: Request, id: string): Response {
@@ -70,44 +59,6 @@ export class VideoAgentController {
 		return new Response(fileStream(source), { headers })
 	}
 
-	async analyze(request: Request, id: string): Promise<Response> {
-		const state = this.stateOr404(id)
-		if (state instanceof Response) return state
-		if (!state.words || state.words.length === 0) return json({ error: state.transcriptError ?? "no transcript available" }, 400)
-		if (state.words.length > MAX_ANALYZE_WORDS) return json({ error: "video too long for AI analysis" }, 413)
-
-		// each run bills a subscription request — return the cached result unless ?force=1
-		if (state.analysis && new URL(request.url).searchParams.get("force") !== "1") {
-			return json({ cuts: state.analysis.cuts, flagged: state.analysis.flagged })
-		}
-		try {
-			const result = await service.analyze(state)
-			service.patchState(id, { analysis: { ...result, at: new Date().toISOString() } })
-			return json(result)
-		} catch (err) {
-			return json({ error: (err as Error).message }, 500)
-		}
-	}
-
-	async startExport(request: Request, id: string): Promise<Response> {
-		const state = this.stateOr404(id)
-		if (state instanceof Response) return state
-		if (state.export.status === "rendering") return json({ error: "already rendering" }, 409)
-
-		let cuts
-		try {
-			cuts = exportInputSchema.parse(await request.json()).cuts
-		} catch (err) {
-			return json({ error: `bad request body: ${(err as Error).message}` }, 400)
-		}
-		service.patchState(id, { export: { status: "rendering" } })
-		service
-			.renderExport(id, cuts)
-			.then(() => service.patchState(id, { export: { status: "ready" } }))
-			.catch((err: Error) => service.patchState(id, { export: { status: "error", error: err.message } }))
-		return json({ ok: true })
-	}
-
 	downloadExport(id: string): Response {
 		const state = this.stateOr404(id)
 		if (state instanceof Response) return state
@@ -122,13 +73,6 @@ export class VideoAgentController {
 				"content-disposition": `attachment; filename="${base}-edited.mp4"`,
 			},
 		})
-	}
-
-	delete(id: string): Response {
-		const state = this.stateOr404(id)
-		if (state instanceof Response) return state
-		service.delete(id)
-		return json({ ok: true })
 	}
 }
 

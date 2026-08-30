@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Check, Eye, EyeOff, Maximize2, Trash2, Upload } from "lucide-react"
 import { env } from "#/env"
+import { useTRPC } from "#/integrations/trpc/react"
 import { copyToClipboard } from "#/lib/clipboard"
 
 export const Route = createFileRoute("/pi")({
@@ -37,7 +39,11 @@ const SHOW_IMAGES_KEY = "pi:show-images"
 type Toast = { text: string; kind: "success" | "error" }
 
 function PastePhotos() {
-	const [images, setImages] = useState<Array<string>>([])
+	const trpc = useTRPC()
+	const queryClient = useQueryClient()
+	const { data: images = [] } = useQuery(trpc.pastedImages.list.queryOptions())
+	const invalidateList = () => queryClient.invalidateQueries(trpc.pastedImages.list.queryFilter())
+	const deleteMutation = useMutation(trpc.pastedImages.delete.mutationOptions({ onSuccess: invalidateList }))
 	const [showImages, setShowImages] = useState<boolean>(() => {
 		try {
 			return localStorage.getItem(SHOW_IMAGES_KEY) === "1"
@@ -50,11 +56,6 @@ function PastePhotos() {
 	const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 	const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 	const fileInputRef = useRef<HTMLInputElement | null>(null)
-
-	async function refresh() {
-		const res = await fetch("/api/pasted-images")
-		setImages(await res.json())
-	}
 
 	function flashToast(text: string, kind: Toast["kind"], ms = 3000) {
 		if (toastTimer.current) clearTimeout(toastTimer.current)
@@ -95,7 +96,7 @@ function PastePhotos() {
 					if (!res.ok) throw new Error(`upload failed: ${res.status}`)
 				}),
 			)
-			await refresh()
+			await invalidateList()
 			flashToast("Uploaded ✓", "success")
 		} catch {
 			flashToast("Upload failed — the copied URL won't resolve", "error", 8000)
@@ -107,8 +108,6 @@ function PastePhotos() {
 	uploadFilesRef.current = uploadFiles
 
 	useEffect(() => {
-		refresh()
-
 		let lastPasteAt = 0
 
 		// global watcher: Ctrl+V anywhere on the page uploads the clipboard image.
@@ -176,9 +175,8 @@ function PastePhotos() {
 		flashCopied(name)
 	}
 
-	async function deleteImage(name: string) {
-		const res = await fetch(`/pasted-images/${name}`, { method: "DELETE" })
-		if (res.ok) setImages((prev) => prev.filter((n) => n !== name))
+	function deleteImage(name: string) {
+		deleteMutation.mutate({ name })
 	}
 
 	return (

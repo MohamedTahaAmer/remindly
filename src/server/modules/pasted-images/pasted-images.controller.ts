@@ -5,11 +5,12 @@ import { fileStream, json } from "#/server/common/helpers/http.helper"
 import { EXT_TO_MIME, IMAGE_NAME_RE, MIME_TO_EXT } from "./pasted-images.constants.ts"
 import { pastedImagesService as service } from "./pasted-images.service.ts"
 
+/**
+ * Raw HTTP layer for the pasted-images byte streams — the binary upload and
+ * the image serving (`<img src>` needs a plain URL). Everything JSON-shaped
+ * lives in pasted-images.router.ts.
+ */
 export class PastedImagesController {
-	list(): Response {
-		return json(service.list())
-	}
-
 	async upload(request: Request): Promise<Response> {
 		const body = Buffer.from(await request.arrayBuffer())
 		const mime = (request.headers.get("content-type") ?? "").split(";")[0].trim()
@@ -36,11 +37,6 @@ export class PastedImagesController {
 				"cache-control": "public, max-age=31536000, immutable",
 			},
 		})
-	}
-
-	delete(name: string): Response {
-		if (!service.delete(name)) return new Response("not found", { status: 404 })
-		return json({ ok: true })
 	}
 }
 

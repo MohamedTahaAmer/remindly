@@ -5,7 +5,6 @@ export const Route = createFileRoute("/pasted-texts/$id")({
 	server: {
 		handlers: {
 			GET: ({ params }) => pastedTextsController.serve(params.id),
-			DELETE: ({ params }) => pastedTextsController.delete(params.id),
 		},
 	},
 })
