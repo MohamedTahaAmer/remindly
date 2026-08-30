@@ -5,7 +5,7 @@ import { X } from "lucide-react"
 import { useTRPC } from "#/integrations/trpc/react"
 import { parseBlockMarkdown, parseInlineMarkdown } from "#/lib/markdown"
 import { intervalDaysFor, nextIntervalIndex } from "#/lib/schedule"
-import type { ReviewRating } from "#/db/schema"
+import type { ReviewRating } from "#/server/infrastructure/database/schema"
 
 type Card = {
 	id: number

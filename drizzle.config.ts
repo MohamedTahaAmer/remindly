@@ -9,7 +9,7 @@ const needsSsl = !["localhost", "127.0.0.1"].includes(u.hostname)
 
 export default defineConfig({
 	out: "./drizzle",
-	schema: "./src/db/schema.ts",
+	schema: "./src/server/infrastructure/database/schema.ts",
 	dialect: "mysql",
 	dbCredentials: {
 		host: u.hostname,

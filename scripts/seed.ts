@@ -2,8 +2,8 @@ import { readdir, readFile } from "node:fs/promises"
 import { join, relative } from "node:path"
 import { config } from "dotenv"
 import { and, eq, inArray } from "drizzle-orm"
-import { db } from "#/db"
-import { cardTags, cards, tags } from "#/db/schema"
+import { db } from "#/server/infrastructure/database/database"
+import { cardTags, cards, tags } from "#/server/infrastructure/database/schema"
 
 config({ path: [".env.local", ".env"] })
 

@@ -1,9 +1,5 @@
 import { defineConfig } from "vite"
 import { devtools } from "@tanstack/devtools-vite"
-import { cloudflare } from "@cloudflare/vite-plugin"
-import { pastedImages } from "./scripts/vite-plugin-pasted-images"
-import { pastedTexts } from "./scripts/vite-plugin-pasted-texts"
-import { videoAgent } from "./scripts/vite-plugin-video-agent"
 
 import { tanstackStart } from "@tanstack/react-start/plugin/vite"
 
@@ -16,17 +12,7 @@ const config = defineConfig({
 	server: { host: true },
 	preview: { host: true, port: 3333, strictPort: true },
 	resolve: { tsconfigPaths: true },
-	plugins: [
-		pastedImages(),
-		pastedTexts(),
-		videoAgent(),
-		devtools(),
-		tailwindcss(),
-		tanstackStart(),
-		viteReact(),
-		babel({ presets: [reactCompilerPreset()] }),
-		cloudflare({ viteEnvironment: { name: "ssr" } }),
-	],
+	plugins: [devtools(), tailwindcss(), tanstackStart(), viteReact(), babel({ presets: [reactCompilerPreset()] })],
 })
 
 export default config

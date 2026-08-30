@@ -10,7 +10,7 @@ import { THEME_INIT_SCRIPT } from "#/lib/theme"
 import appCss from "../styles.css?url"
 
 import type { QueryClient } from "@tanstack/react-query"
-import type { TRPCRouter } from "#/integrations/trpc/router"
+import type { TRPCRouter } from "#/server/infrastructure/trpc/app.router"
 import type { TRPCOptionsProxy } from "@trpc/tanstack-react-query"
 
 interface MyRouterContext {

@@ -1,4 +1,4 @@
-import type { ReviewRating } from "#/db/schema"
+import type { ReviewRating } from "#/server/infrastructure/database/schema"
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
