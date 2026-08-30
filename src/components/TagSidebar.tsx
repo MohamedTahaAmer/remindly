@@ -153,7 +153,11 @@ export function TagSidebar() {
 						placeholder="new tag…"
 						className="w-full min-w-0 rounded-md border border-border bg-card px-2 py-1 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-sage"
 					/>
-					<button type="submit" disabled={!newTag.trim() || createTag.isPending} className="rounded-md border border-border px-2 text-sm text-muted-foreground hover:bg-muted disabled:opacity-40 transition">
+					<button
+						type="submit"
+						disabled={!newTag.trim() || createTag.isPending}
+						className="rounded-md border border-border px-2 text-sm text-muted-foreground hover:bg-muted disabled:opacity-40 transition"
+					>
 						+
 					</button>
 				</form>

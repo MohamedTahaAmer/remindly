@@ -15,11 +15,11 @@ The study system that actually makes material stick (vs. rereading). Rereading f
 - After studying, close everything and reproduce what you learned from memory — write it down or say it out loud.
 - Self-testing retains ~**80%** of material after a week vs. ~**34%** for rereading. Retrieval strengthens the recall pathways; rereading only strengthens recognition.
 
-### 2. Pretesting — quiz yourself *before* you learn
+### 2. Pretesting — quiz yourself _before_ you learn
 
 - Attempt to answer questions (or explain the concept to yourself) before studying it. You'll be wrong — that's the point.
-- Wrong attempts prime the brain to encode the correct answer more deeply when it arrives, by creating a gap it wants to fill (2025 *Memory & Cognition* study).
-- So: **bookend** every session with retrieval — test before *and* after.
+- Wrong attempts prime the brain to encode the correct answer more deeply when it arrives, by creating a gap it wants to fill (2025 _Memory & Cognition_ study).
+- So: **bookend** every session with retrieval — test before _and_ after.
 
 ### 3. Spaced repetition — beat the forgetting curve
 
@@ -30,8 +30,8 @@ The study system that actually makes material stick (vs. rereading). Rereading f
 
 ### 4. Interleaving — shuffle topics, don't block them
 
-- Studying one topic in a long block is another fluency illusion: blocked study *feels* better during practice, but interleaved study scored **63% vs. 20%** on a delayed test.
-- Mixing topics forces the brain to keep identifying *which* concept applies and how it differs from the last — exactly the discrimination you need on the job.
+- Studying one topic in a long block is another fluency illusion: blocked study _feels_ better during practice, but interleaved study scored **63% vs. 20%** on a delayed test.
+- Mixing topics forces the brain to keep identifying _which_ concept applies and how it differs from the last — exactly the discrimination you need on the job.
 - Easy version: just mix topics within your spaced review sessions.
 
 ### 5. Walk and talk — explain it out loud while moving
@@ -42,4 +42,4 @@ The study system that actually makes material stick (vs. rereading). Rereading f
 
 ## The principle
 
-Everything that feels productive — rereading, highlighting, cramming, blocked study — is the trap. Effective studying is uncomfortable by design: the difficulty of retrieval *is* the learning. And none of it matters without consistency.
+Everything that feels productive — rereading, highlighting, cramming, blocked study — is the trap. Effective studying is uncomfortable by design: the difficulty of retrieval _is_ the learning. And none of it matters without consistency.

@@ -11,11 +11,11 @@ Training LLMs takes data, compute, and specialized talent that only a few organi
 Scaling up AI models post-2020 had two major consequences:
 
 1. **Models became more powerful** — capable of more tasks, enabling more applications and more people to create value with AI.
-2. **Only a few organizations can train them** — the data, compute, and talent requirements concentrated model training, which produced *model as a service*: anyone can build on these models without investing in training one.
+2. **Only a few organizations can train them** — the data, compute, and talent requirements concentrated model training, which produced _model as a service_: anyone can build on these models without investing in training one.
 
 ## AI apps aren't new — the access model is
 
-AI powered applications long before LLMs: product recommendations, fraud detection, churn prediction. Many productionization principles carry over. What changed is that you no longer need to build the model — you build *on top of* one.
+AI powered applications long before LLMs: product recommendations, fraud detection, churn prediction. Many productionization principles carry over. What changed is that you no longer need to build the model — you build _on top of_ one.
 
 ===
 
@@ -23,7 +23,7 @@ AI powered applications long before LLMs: product recommendations, fraud detecti
 
 tags: ai-engineering-book
 
-A language model encodes statistical information about one or more languages: how likely a token is to appear in a given context ("My favorite color is __" → "blue", not "car"). It works as a **completion machine** — given a prompt, it predicts a continuation. Because its fixed, finite vocabulary can construct infinite open-ended outputs, it's called *generative*.
+A language model encodes statistical information about one or more languages: how likely a token is to appear in a given context ("My favorite color is \_\_" → "blue", not "car"). It works as a **completion machine** — given a prompt, it predicts a continuation. Because its fixed, finite vocabulary can construct infinite open-ended outputs, it's called _generative_.
 
 ---
 
@@ -47,7 +47,7 @@ Three reasons: tokens break words into **meaningful components** ("cooking" → 
 
 ## Tokenization
 
-Breaking text into tokens is *tokenization*, and the method is decided by the model developers. GPT-4 splits "I can't wait to build AI applications" into nine tokens — "can't" becomes `can` + `'t`. For non-English languages, a single Unicode character can even map to multiple tokens.
+Breaking text into tokens is _tokenization_, and the method is decided by the model developers. GPT-4 splits "I can't wait to build AI applications" into nine tokens — "can't" becomes `can` + `'t`. For non-English languages, a single Unicode character can even map to multiple tokens.
 
 ===
 
@@ -55,14 +55,14 @@ Breaking text into tokens is *tokenization*, and the method is decided by the mo
 
 tags: ai-engineering-book
 
-A **masked** language model predicts missing tokens anywhere in a sequence using context from *both sides* — fill-in-the-blank ("My favorite __ is blue" → "color"); BERT is the classic example, used for non-generative tasks like sentiment analysis, classification, and code debugging. An **autoregressive** language model predicts the *next* token using only *preceding* tokens, generating one token after another — it's the model of choice for text generation, and "language model" usually means autoregressive.
+A **masked** language model predicts missing tokens anywhere in a sequence using context from _both sides_ — fill-in-the-blank ("My favorite \_\_ is blue" → "color"); BERT is the classic example, used for non-generative tasks like sentiment analysis, classification, and code debugging. An **autoregressive** language model predicts the _next_ token using only _preceding_ tokens, generating one token after another — it's the model of choice for text generation, and "language model" usually means autoregressive.
 
 ---
 
 ## Notes
 
 - Autoregressive models are also called **causal** language models.
-- Masked models shine where understanding the *whole* context matters — e.g. debugging code, where the model needs both the preceding and following lines to spot the error.
+- Masked models shine where understanding the _whole_ context matters — e.g. debugging code, where the model needs both the preceding and following lines to spot the error.
 - Technically a masked model like BERT can generate text too, "if you try really hard" — but nobody does.
 
 ===
@@ -71,13 +71,13 @@ A **masked** language model predicts missing tokens anywhere in a sequence using
 
 tags: ai-engineering-book
 
-Many tasks can be framed as completion — translation ("How are you in French is …" → "Comment ça va"), summarization, coding, math, even spam classification ("Question: Is this email likely spam? … Answer:" → "Likely spam"). But **completion isn't conversation**: ask a completion machine a question and it may continue with *another question* instead of answering. Post-training is what makes a model respond appropriately to a user's request.
+Many tasks can be framed as completion — translation ("How are you in French is …" → "Comment ça va"), summarization, coding, math, even spam classification ("Question: Is this email likely spam? … Answer:" → "Likely spam"). But **completion isn't conversation**: ask a completion machine a question and it may continue with _another question_ instead of answering. Post-training is what makes a model respond appropriately to a user's request.
 
 ---
 
 ## The framing trick
 
-The power comes from prompt framing: you shape the text so that the most likely continuation *is* the answer you want. That one mechanism turns a single model into a translator, a summarizer, and a classifier — no task-specific training required.
+The power comes from prompt framing: you shape the text so that the most likely continuation _is_ the answer you want. That one mechanism turns a single model into a translator, a summarizer, and a classifier — no task-specific training required.
 
 ===
 
@@ -91,7 +91,7 @@ tags: ai-engineering-book
 
 ## What supervision costs
 
-The 2010s successes were supervised — AlexNet (2012) learned from over 1 million ImageNet images labeled into 1,000 categories. At 5¢ per label that's $50,000 for one pass; double it to cross-check quality; $50M to scale to 1 million categories. And everyday objects are the *cheap* case — Latin translations cost more, and labeling CT scans for cancer would be astronomical.
+The 2010s successes were supervised — AlexNet (2012) learned from over 1 million ImageNet images labeled into 1,000 categories. At 5¢ per label that's $50,000 for one pass; double it to cross-check quality; $50M to scale to 1 million categories. And everyday objects are the _cheap_ case — Latin translations cost more, and labeling CT scans for cancer would be astronomical.
 
 ## How self-supervision sidesteps it
 
@@ -123,7 +123,7 @@ By its **number of parameters** — the variables updated during training. In ge
 
 tags: ai-engineering-book
 
-Larger models have **more capacity to learn**, so they need more data to maximize their performance. You *can* train a large model on a small dataset — it just wastes compute: a smaller model would achieve similar or better results on that dataset.
+Larger models have **more capacity to learn**, so they need more data to maximize their performance. You _can_ train a large model on a small dataset — it just wastes compute: a smaller model would achieve similar or better results on that dataset.
 
 ===
 

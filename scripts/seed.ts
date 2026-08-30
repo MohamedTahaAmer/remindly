@@ -111,10 +111,7 @@ async function loadSeeds(): Promise<SeedCard[]> {
 	const entries = await readdir(CONTENT_DIR, { recursive: true, withFileTypes: true })
 	const mdFiles = entries.filter((e) => e.isFile() && e.name.endsWith(".md"))
 	const bad = mdFiles.filter((f) => !FILENAME_RE.test(f.name))
-	if (bad.length)
-		throw new Error(
-			`content file(s) not matching NNNN_slug.md: ${bad.map((f) => relative(CONTENT_DIR, join(f.parentPath, f.name))).join(", ")}`,
-		)
+	if (bad.length) throw new Error(`content file(s) not matching NNNN_slug.md: ${bad.map((f) => relative(CONTENT_DIR, join(f.parentPath, f.name))).join(", ")}`)
 	const paths = mdFiles.map((f) => join(f.parentPath, f.name)).sort()
 	const out: SeedCard[] = []
 	for (const p of paths) {

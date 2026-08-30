@@ -109,34 +109,32 @@ export const cardsRouter = {
 	}),
 
 	// Cards whose next review is due, plus K random non-due "surprise" cards.
-	dueToday: publicProcedure
-		.input(tagFilterInput.extend({ extraRandom: z.number().int().min(0).max(20).default(3) }).optional())
-		.query(async ({ input }) => {
-			const extraRandom = input?.extraRandom ?? 3
-			const now = new Date()
-			const tagIds = input?.tagIds ?? []
-			const tagCond = tagIds.length ? tagFilter(tagIds, input?.match ?? "any") : undefined
+	dueToday: publicProcedure.input(tagFilterInput.extend({ extraRandom: z.number().int().min(0).max(20).default(3) }).optional()).query(async ({ input }) => {
+		const extraRandom = input?.extraRandom ?? 3
+		const now = new Date()
+		const tagIds = input?.tagIds ?? []
+		const tagCond = tagIds.length ? tagFilter(tagIds, input?.match ?? "any") : undefined
 
-			const due = await db
+		const due = await db
+			.select()
+			.from(cards)
+			.where(and(lte(cards.scheduledFor, now), tagCond))
+			.orderBy(desc(cards.createdAt))
+		const dueIds = new Set(due.map((c) => c.id))
+
+		let random: typeof due = []
+		if (extraRandom > 0) {
+			const all = await db
 				.select()
 				.from(cards)
-				.where(and(lte(cards.scheduledFor, now), tagCond))
-				.orderBy(desc(cards.createdAt))
-			const dueIds = new Set(due.map((c) => c.id))
+				.where(and(...(tagCond ? [tagCond] : []), ...(dueIds.size ? [ne(cards.id, -1)] : [])))
+				.orderBy(sql`RAND()`)
+				.limit(extraRandom + dueIds.size)
+			random = all.filter((c) => !dueIds.has(c.id)).slice(0, extraRandom)
+		}
 
-			let random: typeof due = []
-			if (extraRandom > 0) {
-				const all = await db
-					.select()
-					.from(cards)
-					.where(and(...(tagCond ? [tagCond] : []), ...(dueIds.size ? [ne(cards.id, -1)] : [])))
-					.orderBy(sql`RAND()`)
-					.limit(extraRandom + dueIds.size)
-				random = all.filter((c) => !dueIds.has(c.id)).slice(0, extraRandom)
-			}
-
-			return { due: await withTags(due), random: await withTags(random) }
-		}),
+		return { due: await withTags(due), random: await withTags(random) }
+	}),
 
 	// Ad-hoc "surprise me" — N random cards regardless of schedule.
 	surprise: publicProcedure.input(z.object({ n: z.number().int().min(1).max(20).default(5) }).optional()).query(async ({ input }) => {
