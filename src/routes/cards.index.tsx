@@ -8,8 +8,10 @@ export const Route = createFileRoute("/cards/")({
 	component: CardsList,
 	validateSearch: validateTagSearch,
 	loaderDeps: ({ search }) => ({ tags: search.tags, match: search.match }),
-	loader: async ({ context, deps }) => {
-		await context.queryClient.prefetchQuery(context.trpc.cards.list.queryOptions({ tagIds: deps.tags, match: deps.match ?? "any" }))
+	loader: ({ context, deps }) => {
+		// kick off the fetch but don't block the navigation: the component renders
+		// cached data right away and rerenders when the fresh result lands
+		void context.queryClient.prefetchQuery(context.trpc.cards.list.queryOptions({ tagIds: deps.tags, match: deps.match ?? "any" }))
 	},
 })
 
