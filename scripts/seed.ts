@@ -1,5 +1,5 @@
 import { readdir, readFile } from "node:fs/promises"
-import { join } from "node:path"
+import { join, relative } from "node:path"
 import { config } from "dotenv"
 import { and, eq, inArray } from "drizzle-orm"
 import { db } from "#/db"
@@ -16,7 +16,7 @@ type SeedCard = {
 
 const CONTENT_DIR = join(process.cwd(), "content")
 
-// File format:
+// Card format:
 //   # <front — inline markdown title>
 //
 //   tags: <comma-separated tag names — optional>
@@ -26,6 +26,8 @@ const CONTENT_DIR = join(process.cwd(), "content")
 //   ---
 //
 //   <everything below is detailsMarkdown — optional>
+//
+// A file holds one card, or several separated by lines of `===` (three or more).
 function parseCard(source: string, filename: string): SeedCard {
 	const lines = source.replace(/\r\n/g, "\n").split("\n")
 	const firstNonBlank = lines.findIndex((l) => l.trim() !== "")
@@ -93,18 +95,31 @@ async function syncCardTags(cardId: number, tagIds: number[]) {
 	if (toRemove.length) await db.delete(cardTags).where(and(eq(cardTags.cardId, cardId), inArray(cardTags.tagId, toRemove)))
 }
 
-// Content files are named NNNN_slug.md (4-digit number, then the slug).
+// Split a file into card sections on `===` separator lines (single-card files have none).
+function parseFile(source: string, filename: string): SeedCard[] {
+	const sections = source.replace(/\r\n/g, "\n").split(/^={3,}\s*$/m)
+	const nonEmpty = sections.filter((s) => s.trim() !== "")
+	if (!nonEmpty.length) throw new Error(`${filename}: empty file`)
+	return nonEmpty.map((s, i) => parseCard(s, nonEmpty.length > 1 ? `${filename} (card ${i + 1})` : filename))
+}
+
+// Content files are named NNNN_slug.md (4-digit number, then the slug),
+// either directly in content/ or nested in subfolders.
 const FILENAME_RE = /^\d{4}_.+\.md$/
 
 async function loadSeeds(): Promise<SeedCard[]> {
-	const entries = await readdir(CONTENT_DIR)
-	const bad = entries.filter((f) => f.endsWith(".md") && !FILENAME_RE.test(f))
-	if (bad.length) throw new Error(`content file(s) not matching NNNN_slug.md: ${bad.join(", ")}`)
-	const files = entries.filter((f) => FILENAME_RE.test(f)).sort()
+	const entries = await readdir(CONTENT_DIR, { recursive: true, withFileTypes: true })
+	const mdFiles = entries.filter((e) => e.isFile() && e.name.endsWith(".md"))
+	const bad = mdFiles.filter((f) => !FILENAME_RE.test(f.name))
+	if (bad.length)
+		throw new Error(
+			`content file(s) not matching NNNN_slug.md: ${bad.map((f) => relative(CONTENT_DIR, join(f.parentPath, f.name))).join(", ")}`,
+		)
+	const paths = mdFiles.map((f) => join(f.parentPath, f.name)).sort()
 	const out: SeedCard[] = []
-	for (const f of files) {
-		const source = await readFile(join(CONTENT_DIR, f), "utf8")
-		out.push(parseCard(source, f))
+	for (const p of paths) {
+		const source = await readFile(p, "utf8")
+		out.push(...parseFile(source, relative(CONTENT_DIR, p)))
 	}
 	return out
 }
