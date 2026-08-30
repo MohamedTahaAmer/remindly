@@ -3,6 +3,7 @@ import { devtools } from "@tanstack/devtools-vite"
 import { cloudflare } from "@cloudflare/vite-plugin"
 import { pastedImages } from "./scripts/vite-plugin-pasted-images"
 import { pastedTexts } from "./scripts/vite-plugin-pasted-texts"
+import { videoAgent } from "./scripts/vite-plugin-video-agent"
 
 import { tanstackStart } from "@tanstack/react-start/plugin/vite"
 
@@ -18,6 +19,7 @@ const config = defineConfig({
 	plugins: [
 		pastedImages(),
 		pastedTexts(),
+		videoAgent(),
 		devtools(),
 		tailwindcss(),
 		tanstackStart(),

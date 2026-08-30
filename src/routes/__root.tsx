@@ -58,6 +58,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 							<Link to="/cards/new" activeProps={{ className: "text-foreground" }}>
 								New
 							</Link>
+							<Link to="/video-agent" activeProps={{ className: "text-foreground" }}>
+								Video
+							</Link>
 						</div>
 						<div className="ml-auto">
 							<ThemeToggle />
