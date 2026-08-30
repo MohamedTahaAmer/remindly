@@ -1,8 +1,43 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { useNavigate, useSearch } from "@tanstack/react-router"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { X } from "lucide-react"
+import { Tooltip } from "radix-ui"
 import { useTRPC } from "#/integrations/trpc/react"
+
+// Tag name that shows the full text in a tooltip, but only when it's actually truncated.
+function TagName({ name }: { name: string }) {
+	const ref = useRef<HTMLSpanElement>(null)
+	const [open, setOpen] = useState(false)
+
+	return (
+		<Tooltip.Provider delayDuration={300}>
+			<Tooltip.Root
+				open={open}
+				onOpenChange={(next) => {
+					const el = ref.current
+					setOpen(next && !!el && el.scrollWidth > el.clientWidth)
+				}}
+			>
+				<Tooltip.Trigger asChild>
+					<span ref={ref} className="truncate">
+						{name}
+					</span>
+				</Tooltip.Trigger>
+				<Tooltip.Portal>
+					<Tooltip.Content
+						side="top"
+						sideOffset={6}
+						className="z-50 max-w-60 rounded-md border border-border bg-card px-2 py-1 text-xs text-foreground shadow-md [overflow-wrap:anywhere]"
+					>
+						{name}
+						<Tooltip.Arrow className="fill-card" />
+					</Tooltip.Content>
+				</Tooltip.Portal>
+			</Tooltip.Root>
+		</Tooltip.Provider>
+	)
+}
 
 export type TagSearch = { tags?: number[]; match?: "all" }
 
@@ -95,7 +130,7 @@ export function TagSidebar() {
 										active ? "bg-sage/15 text-sage" : "text-muted-foreground hover:bg-muted hover:text-foreground"
 									}`}
 								>
-									<span className="truncate">{tag.name}</span>
+									<TagName name={tag.name} />
 									<span className="text-xs opacity-60">{tag.cardCount}</span>
 								</button>
 								<button
