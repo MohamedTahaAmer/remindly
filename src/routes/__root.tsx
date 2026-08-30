@@ -75,10 +75,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 						</div>
 					</div>
 				</nav>
-				<div className="max-w-6xl mx-auto px-6 py-8 flex gap-8 items-start">
-					{pathname === "/" && <TagSidebar />}
-					<main className="flex-1 min-w-0">{children}</main>
-				</div>
+				{pathname === "/" && <TagSidebar />}
+				<main className="max-w-6xl mx-auto px-6 py-8">{children}</main>
 				<TanStackDevtools
 					config={{ position: "bottom-right" }}
 					plugins={[{ name: "Tanstack Router", render: <TanStackRouterDevtoolsPanel /> }, TanStackQueryDevtools]}

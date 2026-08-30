@@ -1,9 +1,11 @@
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useNavigate, useSearch } from "@tanstack/react-router"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { X } from "lucide-react"
+import { ChevronsLeft, Tag, X } from "lucide-react"
 import { Tooltip } from "radix-ui"
 import { useTRPC } from "#/integrations/trpc/react"
+
+const COLLAPSED_KEY = "tag-sidebar-collapsed"
 
 // Tag name that shows the full text in a tooltip, but only when it's actually truncated.
 function TagName({ name }: { name: string }) {
@@ -58,6 +60,24 @@ export function TagSidebar() {
 	const match = search.match ?? "any"
 	const [newTag, setNewTag] = useState("")
 
+	// Collapsed state persists per browser; read after mount so SSR markup stays stable.
+	const [collapsed, setCollapsed] = useState(false)
+	useEffect(() => {
+		try {
+			setCollapsed(localStorage.getItem(COLLAPSED_KEY) === "1")
+		} catch {
+			/* storage unavailable — stay expanded */
+		}
+	}, [])
+	const setCollapsedPersisted = (next: boolean) => {
+		setCollapsed(next)
+		try {
+			localStorage.setItem(COLLAPSED_KEY, next ? "1" : "0")
+		} catch {
+			/* fine without persistence */
+		}
+	}
+
 	const invalidate = () => {
 		void queryClient.invalidateQueries()
 	}
@@ -93,16 +113,42 @@ export function TagSidebar() {
 		createTag.mutate({ name }, { onSuccess: () => setNewTag("") })
 	}
 
+	if (collapsed) {
+		return (
+			<button
+				onClick={() => setCollapsedPersisted(false)}
+				title="Show tags"
+				className="hidden md:flex fixed left-3 top-20 z-20 items-center justify-center rounded-full border border-border bg-card p-2.5 shadow-sm hover:bg-muted transition"
+			>
+				<Tag className="size-4 text-muted-foreground" />
+				{selected.length > 0 && (
+					<span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-sage text-[10px] font-medium text-white">
+						{selected.length}
+					</span>
+				)}
+			</button>
+		)
+	}
+
 	return (
-		<aside className="hidden md:block w-48 shrink-0">
-			<div className="sticky top-20 space-y-4">
-				<div className="flex items-center justify-between">
+		<aside className="hidden md:block fixed left-3 top-20 z-20 w-52 max-h-[calc(100vh-6rem)] overflow-y-auto rounded-xl border border-border bg-card p-4 shadow-sm">
+			<div className="space-y-4">
+				<div className="flex items-center justify-between gap-2">
 					<h2 className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-mono">Tags</h2>
-					{selected.length > 0 && (
-						<button onClick={() => setSelection([])} className="text-xs text-muted-foreground hover:text-foreground transition">
-							clear
+					<div className="flex items-center gap-2">
+						{selected.length > 0 && (
+							<button onClick={() => setSelection([])} className="text-xs text-muted-foreground hover:text-foreground transition">
+								clear
+							</button>
+						)}
+						<button
+							onClick={() => setCollapsedPersisted(true)}
+							title="Hide tags"
+							className="text-muted-foreground hover:text-foreground transition"
+						>
+							<ChevronsLeft className="size-4" />
 						</button>
-					)}
+					</div>
 				</div>
 
 				{selected.length > 1 && (
