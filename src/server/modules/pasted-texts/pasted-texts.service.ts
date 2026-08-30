@@ -1,5 +1,6 @@
 import fs from "node:fs"
 import path from "node:path"
+import { TRPCError } from "@trpc/server"
 
 import { serverConfig } from "#/server/infrastructure/config/config"
 
@@ -48,10 +49,10 @@ export class PastedTextsService {
 		return db.prepare("SELECT id, text, created_at AS createdAt FROM texts ORDER BY id DESC").all() as Array<PastedText>
 	}
 
-	async create(text: string): Promise<number> {
+	async create(text: string) {
 		const db = await this.openDb()
 		const { lastInsertRowid } = db.prepare("INSERT INTO texts (text) VALUES (?)").run(text)
-		return Number(lastInsertRowid)
+		return { id: Number(lastInsertRowid) }
 	}
 
 	async get(id: number): Promise<string | null> {
@@ -60,10 +61,11 @@ export class PastedTextsService {
 		return row?.text ?? null
 	}
 
-	async delete(id: number): Promise<boolean> {
+	async delete(id: number) {
 		const db = await this.openDb()
 		const { changes } = db.prepare("DELETE FROM texts WHERE id = ?").run(id)
-		return changes !== 0
+		if (changes === 0) throw new TRPCError({ code: "NOT_FOUND", message: "text not found" })
+		return { ok: true } as const
 	}
 }
 

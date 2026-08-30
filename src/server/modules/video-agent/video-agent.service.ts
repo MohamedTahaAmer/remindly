@@ -3,9 +3,11 @@ import path from "node:path"
 import { Readable } from "node:stream"
 import { pipeline } from "node:stream/promises"
 
+import { TRPCError } from "@trpc/server"
+
 import { run } from "#/server/common/helpers/spawn.helper"
 import { serverConfig } from "#/server/infrastructure/config/config"
-import { EDIT_POLICY, PROJECT_ID_RE } from "./video-agent.constants.ts"
+import { EDIT_POLICY, MAX_ANALYZE_WORDS, PROJECT_ID_RE } from "./video-agent.constants.ts"
 import { cutListSchema } from "./schema/video-agent.schema.ts"
 import type { AiCut, ProjectState, Span, Word } from "./schema/video-agent.schema.ts"
 
@@ -90,8 +92,47 @@ export class VideoAgentService {
 		return id
 	}
 
+	// ── tRPC endpoint logic (throws TRPCError; the router is pure glue) ──
+
+	/** The id regex is the path-traversal guard for every project procedure. */
+	getStateOrThrow(id: string): ProjectState {
+		const state = PROJECT_ID_RE.test(id) ? this.readState(id) : null
+		if (!state) throw new TRPCError({ code: "NOT_FOUND", message: "unknown project" })
+		return state
+	}
+
+	async analyzeProject(id: string, force: boolean) {
+		const state = this.getStateOrThrow(id)
+		if (!state.words || state.words.length === 0) throw new TRPCError({ code: "BAD_REQUEST", message: state.transcriptError ?? "no transcript available" })
+		if (state.words.length > MAX_ANALYZE_WORDS) throw new TRPCError({ code: "PAYLOAD_TOO_LARGE", message: "video too long for AI analysis" })
+
+		// each run bills a subscription request — return the cached result unless forced
+		if (state.analysis && !force) return { cuts: state.analysis.cuts, flagged: state.analysis.flagged }
+		try {
+			const result = await this.analyze(state)
+			this.patchState(id, { analysis: { ...result, at: new Date().toISOString() } })
+			return result
+		} catch (err) {
+			throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: (err as Error).message })
+		}
+	}
+
+	startExport(id: string, cuts: Array<Span>) {
+		const state = this.getStateOrThrow(id)
+		if (state.export.status === "rendering") throw new TRPCError({ code: "CONFLICT", message: "already rendering" })
+
+		this.patchState(id, { export: { status: "rendering" } })
+		// render async; the frontend polls `getStateOrThrow` until export.status settles
+		this.renderExport(id, cuts)
+			.then(() => this.patchState(id, { export: { status: "ready" } }))
+			.catch((err: Error) => this.patchState(id, { export: { status: "error", error: err.message } }))
+		return { ok: true } as const
+	}
+
 	delete(id: string) {
+		this.getStateOrThrow(id)
 		fs.rmSync(this.dirOf(id), { recursive: true, force: true })
+		return { ok: true } as const
 	}
 
 	// ── processing pipeline (runs async after /upload responds) ──
@@ -200,7 +241,7 @@ export class VideoAgentService {
 			.trim()
 	}
 
-	async analyze(state: ProjectState): Promise<{ cuts: Array<AiCut>; flagged: boolean }> {
+	private async analyze(state: ProjectState): Promise<{ cuts: Array<AiCut>; flagged: boolean }> {
 		const words = state.words
 		if (!words) throw new Error("no transcript available")
 
@@ -283,7 +324,7 @@ export class VideoAgentService {
 		return merged
 	}
 
-	async renderExport(id: string, cuts: Array<Span>) {
+	private async renderExport(id: string, cuts: Array<Span>) {
 		const dir = this.dirOf(id)
 		const state = this.readState(id)
 		const source = this.sourceOf(id)

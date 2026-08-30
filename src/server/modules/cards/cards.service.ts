@@ -123,7 +123,7 @@ export class CardsService {
 	}
 
 	// Ad-hoc "surprise me" — N random cards regardless of schedule.
-	async surprise(n: number) {
+	async surprise(n = 5) {
 		return db
 			.select()
 			.from(cards)

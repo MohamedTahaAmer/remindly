@@ -20,7 +20,5 @@ export const cardsRouter = {
 
 	dueToday: publicProcedure.input(dueTodayInputSchema.optional()).query(({ input }) => cardsService.dueToday(input)),
 
-	surprise: publicProcedure
-		.input(z.object({ n: z.number().int().min(1).max(20).default(5) }).optional())
-		.query(({ input }) => cardsService.surprise(input?.n ?? 5)),
+	surprise: publicProcedure.input(z.object({ n: z.number().int().min(1).max(20).default(5) }).optional()).query(({ input }) => cardsService.surprise(input?.n)),
 } satisfies TRPCRouterRecord

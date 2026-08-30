@@ -1,5 +1,6 @@
 import fs from "node:fs"
 import path from "node:path"
+import { TRPCError } from "@trpc/server"
 
 import { serverConfig } from "#/server/infrastructure/config/config"
 import { EXT_TO_MIME } from "./pasted-images.constants.ts"
@@ -35,11 +36,11 @@ export class PastedImagesService {
 		fs.writeFileSync(path.join(this.dir, name), body)
 	}
 
-	delete(name: string): boolean {
+	delete(name: string) {
 		const file = this.fileOf(name)
-		if (!file) return false
+		if (!file) throw new TRPCError({ code: "NOT_FOUND", message: "image not found" })
 		fs.unlinkSync(file)
-		return true
+		return { ok: true } as const
 	}
 }
 
