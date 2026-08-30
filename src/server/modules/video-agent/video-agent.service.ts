@@ -9,7 +9,7 @@ import { run } from "#/server/common/helpers/spawn.helper"
 import { Logger } from "#/server/common/services/logger"
 import { serverConfig } from "#/server/infrastructure/config/config"
 import { EDIT_POLICY, MAX_ANALYZE_WORDS, PROJECT_ID_RE } from "./video-agent.constants.ts"
-import { cutListSchema } from "./dto/video-agent.dto.ts"
+import { cutListJsonSchema, cutListSchema } from "./dto/video-agent.dto.ts"
 import type { AiCut, ProjectState, Span, Word } from "./dto/video-agent.dto.ts"
 
 /**
@@ -259,26 +259,37 @@ export class VideoAgentService {
 
 		const numberedTranscript = words.map((w, i) => `[${i}]${w.text}`).join(" ")
 		// headless Claude Code call on the CLI's subscription auth: no tools, no
-		// settings/CLAUDE.md context, transcript over stdin (arg length limits)
+		// settings/CLAUDE.md context, transcript over stdin (arg length limits),
+		// output shape enforced by --json-schema (derived from the zod dto)
 		let result
 		try {
 			result = await run(
 				serverConfig.claudeBin,
-				["-p", "--model", "claude-opus-5", "--output-format", "json", "--tools", "", "--setting-sources", "", "--system-prompt", EDIT_POLICY],
+				[
+					"-p",
+					"--model",
+					"claude-opus-5",
+					"--output-format",
+					"json",
+					"--tools",
+					"",
+					"--setting-sources",
+					"",
+					"--system-prompt",
+					EDIT_POLICY,
+					"--json-schema",
+					JSON.stringify(cutListJsonSchema),
+				],
 				numberedTranscript,
 			)
 		} catch (err) {
 			const message = (err as NodeJS.ErrnoException).code === "ENOENT" ? "claude CLI not found on this machine" : (err as Error).message
 			throw new Error(message)
 		}
-		const envelope = JSON.parse(result.stdout) as { is_error: boolean; result: string }
+		const envelope = JSON.parse(result.stdout) as { is_error: boolean; result: string; structured_output?: unknown }
 		if (envelope.is_error) throw new Error(`claude CLI failed: ${envelope.result.slice(0, 500)}`)
-		const text = envelope.result
-			.trim()
-			.replace(/^```(?:json)?\s*/, "")
-			.replace(/```\s*$/, "")
-		const parsed = cutListSchema.safeParse(JSON.parse(text))
-		if (!parsed.success) throw new Error("model returned JSON that doesn't match the cut schema")
+		const parsed = cutListSchema.safeParse(envelope.structured_output)
+		if (!parsed.success) throw new Error("model returned output that doesn't match the cut schema")
 
 		// validation: bounds, echo check (the hallucination guard), sort, merge overlaps
 		const valid = parsed.data.cuts.filter((c) => {

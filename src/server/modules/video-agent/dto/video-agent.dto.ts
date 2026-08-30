@@ -50,6 +50,14 @@ export const cutListSchema = z.object({
 		}),
 	),
 })
+// Same contract as a JSON Schema, enforced on the claude CLI call itself
+// (--json-schema) so the output shape is guaranteed, not just requested.
+// draft-7 without the $schema marker — the CLI's validator rejects 2020-12.
+export const cutListJsonSchema = (() => {
+	const schema = z.toJSONSchema(cutListSchema, { target: "draft-7" })
+	delete (schema as Record<string, unknown>).$schema
+	return schema
+})()
 
 const videoAgentIdInputSchema = z.object({ id: z.string() })
 
