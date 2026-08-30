@@ -1,0 +1,50 @@
+diff --git a/node_modules/drizzle-kit/.bun-tag-145a6524d1617e56 b/.bun-tag-145a6524d1617e56
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/node_modules/drizzle-kit/.bun-tag-932fe5b0252bac80 b/.bun-tag-932fe5b0252bac80
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/bin.cjs b/bin.cjs
+index 07274ea6f53fd54a129b3d338892feda6e995cff..4c6ad7d72e01365d1196676031a0b357f9428324 100755
+--- a/bin.cjs
++++ b/bin.cjs
+@@ -16430,7 +16430,7 @@ ${withStyle.errorWarning(
+         let changedType = columnType;
+         if (columnType === "bigint unsigned" && !isNullable && isAutoincrement) {
+           const uniqueIdx = idxRows.filter(
+-            (it) => it["COLUMN_NAME"] === columnName && it["TABLE_NAME"] === tableName && it["NON_UNIQUE"] === 0
++            (it) => it["COLUMN_NAME"] === columnName && it["TABLE_NAME"] === tableName && Number(it["NON_UNIQUE"]) === 0
+           );
+           if (uniqueIdx && uniqueIdx.length === 1) {
+             changedType = columnType.replace("bigint unsigned", "serial");
+@@ -16492,7 +16492,7 @@ ${withStyle.errorWarning(
+         }
+       }
+       const tablePks = await db.query(
+-        `SELECT table_name, column_name, ordinal_position
++        `SELECT table_name AS TABLE_NAME, column_name AS COLUMN_NAME, ordinal_position
+   FROM information_schema.table_constraints t
+   LEFT JOIN information_schema.key_column_usage k
+   USING(constraint_name,table_schema,table_name)
+@@ -16517,9 +16517,10 @@ ${withStyle.errorWarning(
+         }
+       }
+       for (const [key, value] of Object.entries(tableToPk)) {
++        const pkName = `${key}_${value.join("_")}` + (value.length > 1 ? "_pk" : "");
+         result[key].compositePrimaryKeys = {
+-          [`${key}_${value.join("_")}`]: {
+-            name: `${key}_${value.join("_")}`,
++          [pkName]: {
++            name: pkName,
+             columns: value
+           }
+         };
+@@ -16598,7 +16599,7 @@ ${withStyle.errorWarning(
+         const tableName = idxRow["TABLE_NAME"];
+         const constraintName = idxRow["INDEX_NAME"];
+         const columnName = idxRow["COLUMN_NAME"];
+-        const isUnique = idxRow["NON_UNIQUE"] === 0;
++        const isUnique = Number(idxRow["NON_UNIQUE"]) === 0;
+         const tableInResult = result[tableName];
+         if (typeof tableInResult === "undefined") continue;
+         indexesCount += 1;

@@ -101,5 +101,8 @@
 			"esbuild",
 			"lightningcss"
 		]
+	},
+	"patchedDependencies": {
+		"drizzle-kit@0.31.10": "patches/drizzle-kit@0.31.10.patch"
 	}
 }
