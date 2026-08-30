@@ -32,7 +32,7 @@ export class TagsService {
 	async delete(id: number) {
 		await db.delete(cardTags).where(eq(cardTags.tagId, id))
 		await db.delete(tags).where(eq(tags.id, id))
-		return { ok: true }
+		return { ok: true } as const
 	}
 }
 

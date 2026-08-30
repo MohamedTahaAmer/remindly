@@ -3,6 +3,7 @@ import path from "node:path"
 import { TRPCError } from "@trpc/server"
 
 import { serverConfig } from "#/server/infrastructure/config/config"
+import type { PastedText } from "./dto/pasted-texts.dto.ts"
 
 // Text paste board (/pt). Snippets live in a SQLite db on this machine's disk
 // (TEXTS_DB_PATH, falling back to _local/pasted-texts.db).
@@ -18,8 +19,6 @@ type SqliteDb = {
 		run: (...params: Array<string | number>) => { changes: number | bigint; lastInsertRowid: number | bigint }
 	}
 }
-
-export type PastedText = { id: number; text: string; createdAt: string }
 
 export class PastedTextsService {
 	private dbPromise: Promise<SqliteDb> | null = null

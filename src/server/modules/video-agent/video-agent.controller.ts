@@ -4,7 +4,7 @@ import path from "node:path"
 import { fileStream, json } from "#/server/common/helpers/http.helper"
 import { PROJECT_ID_RE, VIDEO_EXTS } from "./video-agent.constants.ts"
 import { videoAgentService as service } from "./video-agent.service.ts"
-import type { ProjectState } from "./schema/video-agent.schema.ts"
+import type { ProjectState } from "./dto/video-agent.dto.ts"
 
 /**
  * Raw HTTP layer for the video-agent byte streams — the calls tRPC can't

@@ -4,13 +4,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Check, Maximize2, Trash2 } from "lucide-react"
 import { useTRPC } from "#/integrations/trpc/react"
 import { copyToClipboard } from "#/lib/clipboard"
+import type { PastedText } from "#/server/modules/pasted-texts/dto/pasted-texts.dto"
 
 export const Route = createFileRoute("/pt")({
 	component: PasteTexts,
 	ssr: false,
 })
-
-type PastedText = { id: number; text: string; createdAt: string }
 
 function PasteTexts() {
 	const trpc = useTRPC()

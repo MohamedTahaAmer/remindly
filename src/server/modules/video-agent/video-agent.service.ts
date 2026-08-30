@@ -8,8 +8,8 @@ import { TRPCError } from "@trpc/server"
 import { run } from "#/server/common/helpers/spawn.helper"
 import { serverConfig } from "#/server/infrastructure/config/config"
 import { EDIT_POLICY, MAX_ANALYZE_WORDS, PROJECT_ID_RE } from "./video-agent.constants.ts"
-import { cutListSchema } from "./schema/video-agent.schema.ts"
-import type { AiCut, ProjectState, Span, Word } from "./schema/video-agent.schema.ts"
+import { cutListSchema } from "./dto/video-agent.dto.ts"
+import type { AiCut, ProjectState, Span, Word } from "./dto/video-agent.dto.ts"
 
 /**
  * Descript-style video editor backend (/video-agent). Everything here needs

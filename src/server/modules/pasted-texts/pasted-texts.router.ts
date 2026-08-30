@@ -1,16 +1,23 @@
-import { z } from "zod"
 import type { TRPCRouterRecord } from "@trpc/server"
 
+import { okOutputSchema } from "#/server/common/dto/common.dto"
 import { publicProcedure } from "#/server/infrastructure/trpc/trpc"
 import { pastedTextsService as service } from "./pasted-texts.service.ts"
+import { pastedTextCreateInputSchema, pastedTextCreateOutputSchema, pastedTextDeleteInputSchema, pastedTextListOutputSchema } from "./dto/pasted-texts.dto.ts"
 
-// Pure glue: input schemas + delegation. Logic (and TRPCErrors) live in the
+// Pure glue: dto schemas + delegation. Logic (and TRPCErrors) live in the
 // service. The plain-text view (`GET /pasted-texts/:id`, opened in a new tab)
 // stays on a raw HTTP route — see pasted-texts.controller.ts.
 export const pastedTextsRouter = {
-	list: publicProcedure.query(() => service.list()),
+	list: publicProcedure.output(pastedTextListOutputSchema).query(() => service.list()),
 
-	create: publicProcedure.input(z.object({ text: z.string().trim().min(1) })).mutation(({ input }) => service.create(input.text)),
+	create: publicProcedure
+		.input(pastedTextCreateInputSchema)
+		.output(pastedTextCreateOutputSchema)
+		.mutation(({ input }) => service.create(input.text)),
 
-	delete: publicProcedure.input(z.object({ id: z.number().int() })).mutation(({ input }) => service.delete(input.id)),
+	delete: publicProcedure
+		.input(pastedTextDeleteInputSchema)
+		.output(okOutputSchema)
+		.mutation(({ input }) => service.delete(input.id)),
 } satisfies TRPCRouterRecord

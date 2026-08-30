@@ -6,7 +6,7 @@ import { TRPCError } from "@trpc/server"
 import { db } from "#/server/infrastructure/database/database"
 import { cardTags, cards, tags } from "#/server/infrastructure/database/schema"
 import { parseMarkdown } from "#/lib/markdown"
-import type { CardInput, DueTodayInput, TagFilterInput } from "./schema/cards.schema.ts"
+import type { CardInput, DueTodayInput, TagFilterInput } from "./dto/cards.dto.ts"
 
 export class CardsService {
 	// SQL condition restricting cards to the selected tags —
@@ -86,12 +86,12 @@ export class CardsService {
 				detailsMarkdown: input.detailsMarkdown ?? null,
 			})
 			.where(eq(cards.id, input.id))
-		return { ok: true }
+		return { ok: true } as const
 	}
 
 	async delete(id: number) {
 		await db.delete(cards).where(eq(cards.id, id))
-		return { ok: true }
+		return { ok: true } as const
 	}
 
 	// Cards whose next review is due, plus K random non-due "surprise" cards.

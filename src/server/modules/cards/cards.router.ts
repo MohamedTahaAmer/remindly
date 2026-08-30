@@ -1,24 +1,64 @@
-import { z } from "zod"
 import type { TRPCRouterRecord } from "@trpc/server"
 
+import { okOutputSchema } from "#/server/common/dto/common.dto"
 import { publicProcedure } from "#/server/infrastructure/trpc/trpc"
 import { cardsService } from "./cards.service.ts"
-import { cardInputSchema, dueTodayInputSchema, tagFilterInputSchema } from "./schema/cards.schema.ts"
+import {
+	cardCreateInputSchema,
+	cardCreateOutputSchema,
+	cardDeleteInputSchema,
+	cardDetailsInputSchema,
+	cardDetailsOutputSchema,
+	cardDueTodayInputSchema,
+	cardDueTodayOutputSchema,
+	cardGetInputSchema,
+	cardGetOutputSchema,
+	cardListInputSchema,
+	cardListOutputSchema,
+	cardSurpriseInputSchema,
+	cardSurpriseOutputSchema,
+	cardUpdateInputSchema,
+} from "./dto/cards.dto.ts"
 
+// Pure glue: dto schemas + delegation. Logic lives in the service.
 export const cardsRouter = {
-	list: publicProcedure.input(tagFilterInputSchema.optional()).query(({ input }) => cardsService.list(input)),
+	list: publicProcedure
+		.input(cardListInputSchema)
+		.output(cardListOutputSchema)
+		.query(({ input }) => cardsService.list(input)),
 
-	get: publicProcedure.input(z.object({ id: z.number().int() })).query(({ input }) => cardsService.get(input.id)),
+	get: publicProcedure
+		.input(cardGetInputSchema)
+		.output(cardGetOutputSchema)
+		.query(({ input }) => cardsService.get(input.id)),
 
-	details: publicProcedure.input(z.object({ id: z.number().int() })).query(({ input }) => cardsService.details(input.id)),
+	details: publicProcedure
+		.input(cardDetailsInputSchema)
+		.output(cardDetailsOutputSchema)
+		.query(({ input }) => cardsService.details(input.id)),
 
-	create: publicProcedure.input(cardInputSchema).mutation(({ input }) => cardsService.create(input)),
+	create: publicProcedure
+		.input(cardCreateInputSchema)
+		.output(cardCreateOutputSchema)
+		.mutation(({ input }) => cardsService.create(input)),
 
-	update: publicProcedure.input(cardInputSchema.extend({ id: z.number().int() })).mutation(({ input }) => cardsService.update(input)),
+	update: publicProcedure
+		.input(cardUpdateInputSchema)
+		.output(okOutputSchema)
+		.mutation(({ input }) => cardsService.update(input)),
 
-	delete: publicProcedure.input(z.object({ id: z.number().int() })).mutation(({ input }) => cardsService.delete(input.id)),
+	delete: publicProcedure
+		.input(cardDeleteInputSchema)
+		.output(okOutputSchema)
+		.mutation(({ input }) => cardsService.delete(input.id)),
 
-	dueToday: publicProcedure.input(dueTodayInputSchema.optional()).query(({ input }) => cardsService.dueToday(input)),
+	dueToday: publicProcedure
+		.input(cardDueTodayInputSchema)
+		.output(cardDueTodayOutputSchema)
+		.query(({ input }) => cardsService.dueToday(input)),
 
-	surprise: publicProcedure.input(z.object({ n: z.number().int().min(1).max(20).default(5) }).optional()).query(({ input }) => cardsService.surprise(input?.n)),
+	surprise: publicProcedure
+		.input(cardSurpriseInputSchema)
+		.output(cardSurpriseOutputSchema)
+		.query(({ input }) => cardsService.surprise(input?.n)),
 } satisfies TRPCRouterRecord

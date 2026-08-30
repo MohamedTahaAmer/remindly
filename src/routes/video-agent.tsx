@@ -7,7 +7,7 @@ import { Switch } from "#/components/ui/switch"
 import { useTRPC } from "#/integrations/trpc/react"
 import { trpcClient } from "#/integrations/tanstack-query/root-provider"
 import { cn } from "#/lib/utils"
-import type { AiCut, ProjectState, Span, Word } from "#/server/modules/video-agent/schema/video-agent.schema"
+import type { AiCut, ProjectState, Span, Word } from "#/server/modules/video-agent/dto/video-agent.dto"
 
 export const Route = createFileRoute("/video-agent")({
 	component: VideoAgent,
