@@ -1,7 +1,8 @@
 import { useState } from "react"
 import { Link } from "@tanstack/react-router"
-import { Menu, X } from "lucide-react"
-import { Dialog } from "radix-ui"
+import { Menu } from "lucide-react"
+import { Button } from "#/components/ui/button"
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "#/components/ui/sheet"
 import { ThemeToggle } from "#/components/ThemeToggle"
 
 const LINKS = [
@@ -29,50 +30,39 @@ export function SiteNav() {
 	return (
 		<nav className="border-b border-border bg-background/80 backdrop-blur sticky top-0 z-10">
 			<div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-4 sm:gap-6">
-				<Dialog.Root open={open} onOpenChange={setOpen}>
-					<Dialog.Trigger asChild>
-						<button
-							type="button"
-							aria-label="Open menu"
-							className="sm:hidden -ml-1 inline-flex h-9 w-9 items-center justify-center rounded-md text-foreground hover:bg-muted transition"
-						>
-							<Menu className="h-5 w-5" />
-						</button>
-					</Dialog.Trigger>
-					<Dialog.Portal>
-						<Dialog.Overlay className="fixed inset-0 z-40 bg-black/40 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0" />
-						<Dialog.Content className="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[80vw] flex-col gap-6 border-r border-border bg-background p-5 shadow-xl duration-200 data-[state=open]:animate-in data-[state=open]:slide-in-from-left data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left">
-							<div className="flex items-center justify-between">
+				<Sheet open={open} onOpenChange={setOpen}>
+					<SheetTrigger asChild>
+						<Button variant="ghost" size="icon" aria-label="Open menu" className="sm:hidden -ml-2 [&_svg:not([class*='size-'])]:size-5">
+							<Menu />
+						</Button>
+					</SheetTrigger>
+					<SheetContent
+						side="left"
+						// no focus ring on the close button the moment a tap opens it
+						onOpenAutoFocus={(e) => e.preventDefault()}
+						className="w-72 max-w-[80vw] gap-6 p-5 duration-200 data-[state=open]:duration-200 data-[state=closed]:duration-200">
+						<SheetHeader className="p-0">
+							<SheetTitle className="font-normal">
 								<Logo onClick={close} />
-								<Dialog.Close asChild>
-									<button
-										type="button"
-										aria-label="Close menu"
-										className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted transition"
-									>
-										<X className="h-5 w-5" />
-									</button>
-								</Dialog.Close>
-							</div>
-							<Dialog.Title className="sr-only">Navigation</Dialog.Title>
-							<Dialog.Description className="sr-only">Go to a page</Dialog.Description>
-							<div className="flex flex-col gap-1 text-base text-muted-foreground">
-								{LINKS.map((l) => (
-									<Link
-										key={l.to}
-										to={l.to}
-										onClick={close}
-										activeOptions={{ exact: "exact" in l }}
-										className="rounded-md px-3 py-2.5 hover:bg-muted transition"
-										activeProps={{ className: "bg-muted text-foreground" }}
-									>
-										{l.label}
-									</Link>
-								))}
-							</div>
-						</Dialog.Content>
-					</Dialog.Portal>
-				</Dialog.Root>
+							</SheetTitle>
+							<SheetDescription className="sr-only">Go to a page</SheetDescription>
+						</SheetHeader>
+						<div className="flex flex-col gap-1 text-base text-muted-foreground">
+							{LINKS.map((l) => (
+								<Link
+									key={l.to}
+									to={l.to}
+									onClick={close}
+									activeOptions={{ exact: "exact" in l }}
+									className="rounded-md px-3 py-2.5 hover:bg-muted transition"
+									activeProps={{ className: "bg-muted text-foreground" }}
+								>
+									{l.label}
+								</Link>
+							))}
+						</div>
+					</SheetContent>
+				</Sheet>
 
 				<Logo />
 				<div className="hidden sm:flex gap-4 text-sm text-muted-foreground">
