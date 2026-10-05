@@ -1,10 +1,10 @@
-import { HeadContent, Link, Scripts, createRootRouteWithContext, useLocation } from "@tanstack/react-router"
+import { HeadContent, Scripts, createRootRouteWithContext, useLocation } from "@tanstack/react-router"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { TanStackDevtools } from "@tanstack/react-devtools"
 
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools"
 import { TagSidebar } from "#/components/TagSidebar"
-import { ThemeToggle } from "#/components/ThemeToggle"
+import { SiteNav } from "#/components/SiteNav"
 import { THEME_INIT_SCRIPT } from "#/lib/theme"
 
 import appCss from "../styles.css?url"
@@ -45,37 +45,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<HeadContent />
 			</head>
 			<body className="min-h-screen bg-background text-foreground antialiased">
-				<nav className="border-b border-border bg-background/80 backdrop-blur sticky top-0 z-10">
-					<div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-4 sm:gap-6">
-						<Link to="/" className="font-serif text-2xl tracking-tight text-foreground leading-none shrink-0">
-							<span className="text-sage italic">Remind</span>ly
-						</Link>
-						{/* wraps onto a second line on phones instead of overflowing off-screen */}
-						<div className="flex flex-wrap min-w-0 gap-x-4 gap-y-1 whitespace-nowrap text-sm text-muted-foreground">
-							<Link to="/" activeProps={{ className: "text-foreground" }} activeOptions={{ exact: true }}>
-								Today
-							</Link>
-							<Link to="/cards" activeProps={{ className: "text-foreground" }}>
-								All cards
-							</Link>
-							<Link to="/cards/new" activeProps={{ className: "text-foreground" }}>
-								New
-							</Link>
-							<Link to="/video-agent" activeProps={{ className: "text-foreground" }}>
-								Video
-							</Link>
-							<Link to="/pi" activeProps={{ className: "text-foreground" }}>
-								Images
-							</Link>
-							<Link to="/pt" activeProps={{ className: "text-foreground" }}>
-								Texts
-							</Link>
-						</div>
-						<div className="ml-auto shrink-0">
-							<ThemeToggle />
-						</div>
-					</div>
-				</nav>
+				<SiteNav />
 				{pathname === "/" && <TagSidebar />}
 				<main className="max-w-6xl mx-auto px-6 py-8">{children}</main>
 				<TanStackDevtools
