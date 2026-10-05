@@ -108,6 +108,19 @@
 		color: var(--color-foreground);
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
+		-webkit-tap-highlight-color: transparent;
+	}
+	/* iOS zooms the page into any focused field under 16px */
+	@media (pointer: coarse) {
+		input,
+		textarea,
+		select {
+			font-size: max(16px, 1em);
+		}
+	}
+	/* long code blocks scroll inside themselves instead of widening the page */
+	.prose pre {
+		overflow-x: auto;
 	}
 	code,
 	pre {

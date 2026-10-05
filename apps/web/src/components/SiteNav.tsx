@@ -28,7 +28,7 @@ export function SiteNav() {
 	const close = () => setOpen(false)
 
 	return (
-		<nav className="border-b border-border bg-background/80 backdrop-blur sticky top-0 z-10">
+		<nav className="border-b border-border bg-background/80 backdrop-blur sticky top-0 z-30 pt-[env(safe-area-inset-top)]">
 			<div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-4 sm:gap-6">
 				<Sheet open={open} onOpenChange={setOpen}>
 					<SheetTrigger asChild>

@@ -1,15 +1,22 @@
 {
-	"short_name": "Remindly",
+	"id": "/",
 	"name": "Remindly",
-	"icons": [
-		{
-			"src": "logo.svg",
-			"type": "image/svg+xml",
-			"sizes": "any"
-		}
-	],
-	"start_url": ".",
+	"short_name": "Remindly",
+	"description": "Spaced-repetition flashcards for your own lessons.",
+	"start_url": "/",
+	"scope": "/",
 	"display": "standalone",
-	"theme_color": "#84a59d",
-	"background_color": "#f7ede2"
+	"orientation": "portrait",
+	"theme_color": "#f7ede2",
+	"background_color": "#f7ede2",
+	"icons": [
+		{ "src": "/icon-192.png", "type": "image/png", "sizes": "192x192", "purpose": "any" },
+		{ "src": "/icon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "any" },
+		{ "src": "/icon-maskable-512.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" }
+	],
+	"shortcuts": [
+		{ "name": "New card", "url": "/cards/new", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+		{ "name": "All cards", "url": "/cards", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+		{ "name": "Images", "url": "/pi", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] }
+	]
 }
