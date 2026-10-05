@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Check, Eye, EyeOff, Maximize2, Trash2, Upload } from "lucide-react"
+import { Check, Eye, EyeOff, Maximize2, Play, Trash2, Upload } from "lucide-react"
 import { env } from "#/env"
+import { MIME_TO_EXT, isVideoName } from "#/server/modules/pasted-images/pasted-images.constants"
 import { useTRPC } from "#/integrations/trpc/react"
 import { copyToClipboard } from "#/lib/clipboard"
 
@@ -16,23 +17,16 @@ function publicUrl(path: string) {
 	return `${base.replace(/\/$/, "")}${path}`
 }
 
-const EXT_BY_MIME: Record<string, string> = {
-	"image/png": "png",
-	"image/jpeg": "jpg",
-	"image/gif": "gif",
-	"image/webp": "webp",
-	"image/svg+xml": "svg",
-	"image/avif": "avif",
-	"image/bmp": "bmp",
-}
-
 // name is generated client-side so the URL can be copied before the upload runs
 function makeName(type: string) {
 	const d = new Date()
 	const pad = (n: number) => String(n).padStart(2, "0")
 	const stamp = `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`
-	return `img-${stamp}-${Math.random().toString(36).slice(2, 8)}.${EXT_BY_MIME[type] ?? "png"}`
+	const prefix = type.startsWith("video/") ? "vid" : "img"
+	return `${prefix}-${stamp}-${Math.random().toString(36).slice(2, 8)}.${MIME_TO_EXT[type] ?? "png"}`
 }
+
+const isMedia = (f: File) => f.type.startsWith("image/") || f.type.startsWith("video/")
 
 const SHOW_IMAGES_KEY = "pi:show-images"
 
@@ -76,9 +70,13 @@ function PastePhotos() {
 	}
 
 	async function uploadFiles(files: Array<File>) {
-		const supported = files.filter((f) => f.type in EXT_BY_MIME)
+		const supported = files.filter((f) => f.type in MIME_TO_EXT)
 		if (supported.length < files.length) {
-			flashToast("Some files were skipped — only images (png, jpg, gif, webp, svg, avif, bmp) are supported", "error", 6000)
+			flashToast(
+				"Some files were skipped — only images (png, jpg, gif, webp, svg, avif, bmp) and videos (mp4, webm, mov, mkv, m4v) are supported",
+				"error",
+				6000,
+			)
 			if (supported.length === 0) return
 		}
 		const items = supported.map((file) => ({ file, name: makeName(file.type) }))
@@ -115,7 +113,7 @@ function PastePhotos() {
 		// Ctrl+C in the OS file manager (the browser hands over the file itself)
 		function onPaste(e: ClipboardEvent) {
 			lastPasteAt = Date.now()
-			const files = Array.from(e.clipboardData?.files ?? []).filter((f) => f.type.startsWith("image/"))
+			const files = Array.from(e.clipboardData?.files ?? []).filter(isMedia)
 			if (files.length === 0) {
 				// a copy from some file managers only reaches the page as a path,
 				// which the browser can't read from disk — point at the button instead
@@ -185,7 +183,7 @@ function PastePhotos() {
 				<input
 					ref={fileInputRef}
 					type="file"
-					accept="image/*"
+					accept="image/*,video/*"
 					multiple
 					className="hidden"
 					onChange={(e) => {
@@ -223,8 +221,22 @@ function PastePhotos() {
 					{images.map((name) => (
 						<div key={name} className="relative group">
 							<button type="button" onClick={() => copyImageUrl(name)} aria-label="Copy URL" className="block w-full cursor-pointer">
-								<img src={`/pasted-images/${name}`} alt={name} loading="lazy" className="aspect-square w-full object-cover rounded-lg border border-border" />
+								{isVideoName(name) ? (
+									<video
+										src={`/pasted-images/${name}#t=0.1`}
+										muted
+										preload="metadata"
+										className="aspect-square w-full object-cover rounded-lg border border-border bg-black"
+									/>
+								) : (
+									<img src={`/pasted-images/${name}`} alt={name} loading="lazy" className="aspect-square w-full object-cover rounded-lg border border-border" />
+								)}
 							</button>
+							{isVideoName(name) && (
+								<div className="absolute bottom-1 left-1 rounded-md bg-black/60 text-white p-1 pointer-events-none">
+									<Play className="h-4 w-4" />
+								</div>
+							)}
 							{copied === name && (
 								<div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/40 pointer-events-none">
 									<Check className="h-10 w-10 text-white" />
@@ -253,7 +265,7 @@ function PastePhotos() {
 			)}
 
 			<div className="text-xs text-muted-foreground/60 select-none text-center">
-				Ctrl+V anywhere on this page to upload the image from your clipboard, or pick files with the Upload button.
+				Ctrl+V anywhere on this page to upload the image from your clipboard, or pick images and videos with the Upload button.
 			</div>
 
 			{toast && (

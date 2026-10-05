@@ -4,7 +4,7 @@ import { pastedImagesController } from "#/server/modules/pasted-images/pasted-im
 export const Route = createFileRoute("/pasted-images/$name")({
 	server: {
 		handlers: {
-			GET: ({ params }) => pastedImagesController.serve(params.name),
+			GET: ({ request, params }) => pastedImagesController.serve(request, params.name),
 		},
 	},
 })

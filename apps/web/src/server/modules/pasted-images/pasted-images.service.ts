@@ -1,5 +1,7 @@
 import fs from "node:fs"
 import path from "node:path"
+import { Readable } from "node:stream"
+import { pipeline } from "node:stream/promises"
 import { TRPCError } from "@trpc/server"
 
 import { serverConfig } from "@remindly/config"
@@ -31,9 +33,14 @@ export class PastedImagesService {
 			.map((f) => f.name)
 	}
 
-	save(name: string, body: Buffer) {
+	/** Streams the body to disk (videos can be large); false — and nothing kept — when it was empty. */
+	async save(name: string, body: ReadableStream): Promise<boolean> {
 		fs.mkdirSync(this.dir, { recursive: true })
-		fs.writeFileSync(path.join(this.dir, name), body)
+		const file = path.join(this.dir, name)
+		await pipeline(Readable.fromWeb(body as never), fs.createWriteStream(file))
+		if (fs.statSync(file).size > 0) return true
+		fs.unlinkSync(file)
+		return false
 	}
 
 	delete(name: string) {

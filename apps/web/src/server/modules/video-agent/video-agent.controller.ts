@@ -1,7 +1,7 @@
 import fs from "node:fs"
 import path from "node:path"
 
-import { fileStream, json } from "#/server/common/helpers/http.helper"
+import { fileStream, json, rangedFileResponse } from "#/server/common/helpers/http.helper"
 import { Logger } from "@remindly/utils"
 import { PROJECT_ID_RE, VIDEO_EXTS } from "./video-agent.constants.ts"
 import { videoAgentService as service } from "./video-agent.service.ts"
@@ -46,22 +46,7 @@ export class VideoAgentController {
 		const source = service.sourceOf(id)
 		if (!source) return json({ error: "source missing" }, 404)
 
-		const size = fs.statSync(source).size
-		const mime = VIDEO_EXTS[path.extname(source).slice(1)] ?? "application/octet-stream"
-		const headers: Record<string, string> = { "accept-ranges": "bytes", "content-type": mime }
-
-		// byte ranges are required or <video> seeking breaks
-		const range = request.headers.get("range")?.match(/bytes=(\d*)-(\d*)/)
-		if (range && (range[1] !== "" || range[2] !== "")) {
-			const start = range[1] === "" ? Math.max(0, size - Number.parseInt(range[2], 10)) : Number.parseInt(range[1], 10)
-			const end = range[2] === "" || range[1] === "" ? size - 1 : Math.min(size - 1, Number.parseInt(range[2], 10))
-			if (start > end || start >= size) return new Response(null, { status: 416, headers: { "content-range": `bytes */${size}` } })
-			headers["content-range"] = `bytes ${start}-${end}/${size}`
-			headers["content-length"] = String(end - start + 1)
-			return new Response(fileStream(source, { start, end }), { status: 206, headers })
-		}
-		headers["content-length"] = String(size)
-		return new Response(fileStream(source), { headers })
+		return rangedFileResponse(request, source, VIDEO_EXTS[path.extname(source).slice(1)] ?? "application/octet-stream")
 	}
 
 	downloadExport(id: string): Response {
