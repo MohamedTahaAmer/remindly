@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router"
 import { Menu } from "lucide-react"
 import { Button } from "#/components/ui/button"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "#/components/ui/sheet"
+import { InstallAppButton } from "#/components/InstallAppButton"
 import { ThemeToggle } from "#/components/ThemeToggle"
 
 const LINKS = [
@@ -61,6 +62,9 @@ export function SiteNav() {
 								</Link>
 							))}
 						</div>
+						<div className="mt-auto pb-[env(safe-area-inset-bottom)]">
+							<InstallAppButton className="w-full h-11" onDone={close} />
+						</div>
 					</SheetContent>
 				</Sheet>
 
@@ -72,7 +76,8 @@ export function SiteNav() {
 						</Link>
 					))}
 				</div>
-				<div className="ml-auto shrink-0">
+				<div className="ml-auto shrink-0 flex items-center gap-2">
+					<InstallAppButton className="max-lg:hidden" />
 					<ThemeToggle />
 				</div>
 			</div>
