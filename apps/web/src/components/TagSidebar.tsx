@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react"
 import { useNavigate, useSearch } from "@tanstack/react-router"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { ChevronsLeft, Tag, X } from "lucide-react"
+import { ChevronsLeft, Tag, Trash2 } from "lucide-react"
 import { Tooltip } from "radix-ui"
+import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "#/components/ui/sheet"
 import { useTRPC } from "#/integrations/trpc/react"
 
 const COLLAPSED_KEY = "tag-sidebar-collapsed"
@@ -51,14 +52,8 @@ export function validateTagSearch(search: Record<string, unknown>): TagSearch {
 }
 
 export function TagSidebar() {
-	const trpc = useTRPC()
-	const queryClient = useQueryClient()
-	const navigate = useNavigate()
-	const { data: allTags } = useQuery(trpc.tags.list.queryOptions())
 	const search: TagSearch = useSearch({ strict: false })
-	const selected = search.tags ?? []
-	const match = search.match ?? "any"
-	const [newTag, setNewTag] = useState("")
+	const selectedCount = search.tags?.length ?? 0
 
 	// Collapsed state persists per browser; read after mount so SSR markup stays stable.
 	const [collapsed, setCollapsed] = useState(false)
@@ -77,6 +72,66 @@ export function TagSidebar() {
 			/* fine without persistence */
 		}
 	}
+
+	const badge = selectedCount > 0 && (
+		<span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-sage text-[10px] font-medium text-white">
+			{selectedCount}
+		</span>
+	)
+
+	return (
+		<>
+			{/* phones: floating button → bottom sheet */}
+			<Sheet>
+				<SheetTrigger asChild>
+					<button
+						type="button"
+						aria-label="Filter by tag"
+						className="md:hidden fixed right-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-20 flex items-center gap-2 rounded-full border border-border bg-card px-4 py-3 text-sm text-foreground shadow-lg active:scale-95 transition"
+					>
+						<Tag className="size-4 text-sage" />
+						Tags
+						{badge}
+					</button>
+				</SheetTrigger>
+				<SheetContent side="bottom" showCloseButton={false} className="max-h-[80dvh] rounded-t-2xl px-5 pt-3 pb-[calc(1.25rem+env(safe-area-inset-bottom))] gap-0">
+					<div className="mx-auto mb-4 h-1 w-10 shrink-0 rounded-full bg-muted-foreground/30" />
+					<SheetTitle className="sr-only">Filter by tag</SheetTitle>
+					<SheetDescription className="sr-only">Show only cards with the selected tags</SheetDescription>
+					<div className="overflow-y-auto">
+						<TagPanel />
+					</div>
+				</SheetContent>
+			</Sheet>
+
+			{/* desktop: fixed sidebar, collapsible to an icon */}
+			{collapsed ? (
+				<button
+					onClick={() => setCollapsedPersisted(false)}
+					title="Show tags"
+					className="hidden md:flex fixed left-3 top-20 z-20 items-center justify-center rounded-full border border-border bg-card p-2.5 shadow-sm hover:bg-muted transition"
+				>
+					<Tag className="size-4 text-muted-foreground" />
+					{badge}
+				</button>
+			) : (
+				<aside className="hidden md:block fixed left-3 top-20 z-20 w-52 max-h-[calc(100vh-6rem)] overflow-y-auto rounded-xl border border-border bg-card p-4 shadow-sm">
+					<TagPanel onCollapse={() => setCollapsedPersisted(true)} />
+				</aside>
+			)}
+		</>
+	)
+}
+
+function TagPanel({ onCollapse }: { onCollapse?: () => void }) {
+	const trpc = useTRPC()
+	const queryClient = useQueryClient()
+	const navigate = useNavigate()
+	const { data: allTags } = useQuery(trpc.tags.list.queryOptions())
+	const search: TagSearch = useSearch({ strict: false })
+	const selected = search.tags ?? []
+	const match = search.match ?? "any"
+	const [newTag, setNewTag] = useState("")
 
 	const invalidate = () => {
 		void queryClient.invalidateQueries()
@@ -113,26 +168,8 @@ export function TagSidebar() {
 		createTag.mutate({ name }, { onSuccess: () => setNewTag("") })
 	}
 
-	if (collapsed) {
-		return (
-			<button
-				onClick={() => setCollapsedPersisted(false)}
-				title="Show tags"
-				className="hidden md:flex fixed left-3 top-20 z-20 items-center justify-center rounded-full border border-border bg-card p-2.5 shadow-sm hover:bg-muted transition"
-			>
-				<Tag className="size-4 text-muted-foreground" />
-				{selected.length > 0 && (
-					<span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-sage text-[10px] font-medium text-white">
-						{selected.length}
-					</span>
-				)}
-			</button>
-		)
-	}
-
 	return (
-		<aside className="hidden md:block fixed left-3 top-20 z-20 w-52 max-h-[calc(100vh-6rem)] overflow-y-auto rounded-xl border border-border bg-card p-4 shadow-sm">
-			<div className="space-y-4">
+		<div className="space-y-4">
 				<div className="flex items-center justify-between gap-2">
 					<h2 className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-mono">Tags</h2>
 					<div className="flex items-center gap-2">
@@ -141,9 +178,11 @@ export function TagSidebar() {
 								clear
 							</button>
 						)}
-						<button onClick={() => setCollapsedPersisted(true)} title="Hide tags" className="text-muted-foreground hover:text-foreground transition">
-							<ChevronsLeft className="size-4" />
-						</button>
+						{onCollapse && (
+							<button onClick={onCollapse} title="Hide tags" className="text-muted-foreground hover:text-foreground transition">
+								<ChevronsLeft className="size-4" />
+							</button>
+						)}
 					</div>
 				</div>
 
@@ -168,7 +207,7 @@ export function TagSidebar() {
 							<li key={tag.id} className="group flex items-center gap-1">
 								<button
 									onClick={() => toggle(tag.id)}
-									className={`flex-1 min-w-0 flex items-center justify-between gap-2 rounded-md px-2 py-1 text-sm text-left transition ${
+									className={`flex-1 min-w-0 flex items-center justify-between gap-2 rounded-md px-2 py-2 md:py-1 text-sm text-left transition ${
 										active ? "bg-sage/15 text-sage" : "text-muted-foreground hover:bg-muted hover:text-foreground"
 									}`}
 								>
@@ -178,9 +217,9 @@ export function TagSidebar() {
 								<button
 									onClick={() => onDelete(tag.id, tag.name)}
 									title={`Delete tag "${tag.name}"`}
-									className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-coral transition p-0.5"
+									className="pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 text-muted-foreground/60 hover:text-coral transition p-2 md:p-0.5"
 								>
-									<X className="size-3.5" />
+									<Trash2 className="size-3.5" />
 								</button>
 							</li>
 						)
@@ -204,7 +243,6 @@ export function TagSidebar() {
 					</button>
 				</form>
 				{createTag.isError && <p className="text-xs text-coral">{createTag.error.message}</p>}
-			</div>
-		</aside>
+		</div>
 	)
 }

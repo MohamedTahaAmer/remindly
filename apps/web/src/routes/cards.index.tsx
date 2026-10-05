@@ -70,16 +70,16 @@ function CardsList() {
 	for (const c of (data ?? []) as Card[]) grouped[bucketOf(c.scheduledFor)].push(c)
 
 	return (
-		<div className="space-y-12">
-			<header className="flex items-end justify-between gap-4 border-b border-border pb-6">
+		<div className="space-y-10 sm:space-y-12">
+			<header className="flex items-end justify-between gap-4 border-b border-border pb-5 sm:pb-6">
 				<div>
 					<div className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-mono">The index</div>
-					<h1 className="font-serif text-5xl tracking-tight mt-1">
+					<h1 className="font-serif text-4xl sm:text-5xl tracking-tight mt-1">
 						All cards
 						<span className="text-sage italic font-normal">.</span>
 					</h1>
 				</div>
-				<Link to="/cards/new" className="rounded-full bg-sage hover:bg-sage/90 px-5 py-2.5 text-sm font-medium text-white transition shadow-sm shadow-sage/30">
+				<Link to="/cards/new" className="shrink-0 whitespace-nowrap rounded-full bg-sage hover:bg-sage/90 px-5 py-2.5 text-sm font-medium text-white transition shadow-sm shadow-sage/30">
 					New card →
 				</Link>
 			</header>
@@ -109,9 +109,9 @@ function CardsList() {
 							{items.map((c) => (
 								<li
 									key={c.id}
-									className="group grid grid-cols-[8rem_1fr_auto] gap-6 items-baseline py-4 [content-visibility:auto] [contain-intrinsic-size:auto_4rem]"
+									className="group grid grid-cols-[1fr_auto] sm:grid-cols-[8rem_1fr_auto] gap-x-4 sm:gap-x-6 gap-y-1 items-baseline py-4 [content-visibility:auto] [contain-intrinsic-size:auto_5rem]"
 								>
-									<div className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+									<div className="col-span-2 sm:col-span-1 font-mono text-[11px] uppercase tracking-wider text-muted-foreground whitespace-nowrap">
 										<span className={key === "overdue" ? "text-coral" : key === "today" ? "text-sage" : ""}>{relativeDue(c.scheduledFor)}</span>
 										<span className="text-muted-foreground/60"> · step {c.intervalIndex}</span>
 									</div>
@@ -134,7 +134,7 @@ function CardsList() {
 											</div>
 										)}
 									</div>
-									<div className="flex gap-4 text-xs font-mono uppercase tracking-wider shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+									<div className="flex gap-4 text-xs font-mono uppercase tracking-wider shrink-0 pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 transition-opacity">
 										{c.detailsMarkdown && (
 											<Link to="/cards/$id" params={{ id: String(c.id) }} viewTransition className="text-sage hover:underline underline-offset-4">
 												Read

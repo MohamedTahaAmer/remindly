@@ -2,6 +2,7 @@ import { createFileRoute, useRouter } from "@tanstack/react-router"
 import { useMutation } from "@tanstack/react-query"
 import { useState } from "react"
 import { useTRPC } from "#/integrations/trpc/react"
+import { submitOnEnter } from "#/lib/forms"
 
 export const Route = createFileRoute("/cards/new")({
 	component: NewCard,
@@ -29,8 +30,8 @@ function NewCard() {
 	}
 
 	return (
-		<form onSubmit={submit} className="max-w-2xl mx-auto space-y-10">
-			<header className="border-b border-border pb-6">
+		<form onSubmit={submit} className="max-w-2xl mx-auto space-y-8 sm:space-y-10">
+			<header className="border-b border-border pb-5 sm:pb-6">
 				<div className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-mono">A new entry</div>
 				<h1 className="font-serif text-4xl tracking-tight mt-1">
 					New card<span className="text-sage italic font-normal">.</span>
@@ -38,13 +39,16 @@ function NewCard() {
 			</header>
 
 			<Field label="The prompt" hint="What you want to be asked. Markdown inline allowed.">
-				<input
+				<textarea
 					value={front}
 					onChange={(e) => setFront(e.target.value)}
+					onKeyDown={submitOnEnter}
 					required
 					autoFocus
+					rows={1}
+					enterKeyHint="next"
 					placeholder="Write the question…"
-					className={`${fieldBase} font-serif text-2xl leading-snug`}
+					className={`${fieldBase} resize-none font-serif text-2xl leading-snug`}
 				/>
 			</Field>
 
@@ -69,7 +73,7 @@ function NewCard() {
 				/>
 			</Field>
 
-			<div className="flex items-center gap-3 pt-4">
+			<div className="flex items-center gap-3 pt-2 sm:pt-4">
 				<button
 					type="submit"
 					disabled={create.isPending}
@@ -92,7 +96,7 @@ function NewCard() {
 function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
 	return (
 		<label className="block">
-			<div className="flex items-baseline justify-between mb-2">
+			<div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5 mb-2">
 				<div className="text-[11px] uppercase tracking-[0.2em] font-mono text-muted-foreground">{label}</div>
 				{hint && <div className="text-xs text-muted-foreground/70 italic font-serif">{hint}</div>}
 			</div>

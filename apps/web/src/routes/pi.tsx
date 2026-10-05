@@ -6,6 +6,7 @@ import { env } from "#/env"
 import { MIME_TO_EXT, isVideoName } from "#/server/modules/pasted-images/pasted-images.constants"
 import { useTRPC } from "#/integrations/trpc/react"
 import { copyToClipboard } from "#/lib/clipboard"
+import { confirmDelete } from "#/lib/forms"
 
 export const Route = createFileRoute("/pi")({
 	component: PastePhotos,
@@ -174,6 +175,7 @@ function PastePhotos() {
 	}
 
 	function deleteImage(name: string) {
+		if (!confirmDelete(isVideoName(name) ? "Delete this video?" : "Delete this image?")) return
 		deleteMutation.mutate({ name })
 	}
 
@@ -217,7 +219,7 @@ function PastePhotos() {
 			) : images.length === 0 ? (
 				<p className="text-sm text-muted-foreground/70 italic font-serif">Nothing here yet.</p>
 			) : (
-				<div className="grid grid-cols-8 gap-3">
+				<div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-8 gap-2 sm:gap-3">
 					{images.map((name) => (
 						<div key={name} className="relative group">
 							<button type="button" onClick={() => copyImageUrl(name)} aria-label="Copy URL" className="block w-full cursor-pointer">
@@ -247,17 +249,17 @@ function PastePhotos() {
 								target="_blank"
 								rel="noreferrer"
 								aria-label="Open image in new tab"
-								className="absolute top-1 right-1 rounded-md bg-black/60 text-white p-1.5 transition hover:bg-black/80 opacity-0 group-hover:opacity-100"
+								className="absolute top-1 right-1 rounded-md bg-black/50 text-white p-1 pointer-fine:p-1.5 transition hover:bg-black/80 pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100"
 							>
-								<Maximize2 className="h-7 w-7" />
+								<Maximize2 className="size-3.5 pointer-fine:size-7" />
 							</a>
 							<button
 								type="button"
 								onClick={() => deleteImage(name)}
 								aria-label="Delete image"
-								className="absolute top-1 left-1 rounded-md bg-black/60 text-white p-1.5 transition hover:bg-red-600/90 opacity-0 group-hover:opacity-100"
+								className="absolute top-1 left-1 rounded-md bg-black/50 text-white p-1 pointer-fine:p-1.5 transition hover:bg-red-600/90 pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100"
 							>
-								<Trash2 className="h-7 w-7" />
+								<Trash2 className="size-3.5 pointer-fine:size-7" />
 							</button>
 						</div>
 					))}
@@ -265,12 +267,13 @@ function PastePhotos() {
 			)}
 
 			<div className="text-xs text-muted-foreground/60 select-none text-center">
-				Ctrl+V anywhere on this page to upload the image from your clipboard, or pick images and videos with the Upload button.
+				<span className="pointer-coarse:hidden">Ctrl+V anywhere on this page to upload the image from your clipboard, or pick images and videos with the Upload button.</span>
+				<span className="pointer-fine:hidden">Tap Upload to add photos or videos. Tap a tile to copy its link.</span>
 			</div>
 
 			{toast && (
 				<div
-					className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 rounded-lg px-4 py-2.5 text-sm font-medium text-white shadow-lg pointer-events-none ${
+					className={`fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-50 w-max max-w-[calc(100vw-2rem)] text-center rounded-lg px-4 py-2.5 text-sm font-medium text-white shadow-lg pointer-events-none ${
 						toast.kind === "success" ? "bg-emerald-600" : "bg-red-600"
 					}`}
 				>

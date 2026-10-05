@@ -3,6 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query"
 import { useEffect, useRef, useState } from "react"
 import { useTRPC } from "#/integrations/trpc/react"
 import { parseBlockMarkdown, parseInlineMarkdown, parseMarkdown } from "#/lib/markdown"
+import { submitOnEnter } from "#/lib/forms"
 
 export const Route = createFileRoute("/cards/$id_/edit")({
 	component: EditCard,
@@ -26,6 +27,7 @@ function EditCard() {
 	const [details, setDetails] = useState("")
 	const [detailsHtml, setDetailsHtml] = useState("")
 	const deleteDialogRef = useRef<HTMLDialogElement>(null)
+	const [tab, setTab] = useState<"edit" | "preview">("edit")
 
 	useEffect(() => {
 		if (!card) return
@@ -68,9 +70,9 @@ function EditCard() {
 				e.preventDefault()
 				update.mutate({ id: numId, front, back, detailsMarkdown: details.trim() || null })
 			}}
-			className="relative left-1/2 right-1/2 -mx-[50vw] w-screen px-10 min-h-[calc(100vh-8rem)] flex flex-col gap-8"
+			className="relative left-1/2 right-1/2 -mx-[50vw] w-screen px-4 sm:px-10 min-h-[calc(100dvh-8rem)] flex flex-col gap-6 sm:gap-8"
 		>
-			<header className="flex items-end justify-between gap-4 shrink-0 border-b border-border pb-5">
+			<header className="flex flex-wrap items-end justify-between gap-4 shrink-0 border-b border-border pb-5">
 				<div>
 					<div className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-mono">Revising № {card.id}</div>
 					<h1 className="font-serif text-3xl tracking-tight mt-1">
@@ -81,25 +83,46 @@ function EditCard() {
 					<button
 						type="button"
 						onClick={() => router.history.back()}
-						className="rounded-full px-5 py-2.5 text-sm text-muted-foreground hover:text-foreground transition"
+						className="rounded-full px-4 sm:px-5 py-2.5 text-sm text-muted-foreground hover:text-foreground transition"
 					>
 						Cancel
 					</button>
 					<button
 						type="submit"
 						disabled={update.isPending}
-						className="rounded-full bg-sage hover:bg-sage/90 disabled:opacity-50 px-6 py-2.5 text-sm text-white font-medium transition shadow-sm shadow-sage/30"
+						className="whitespace-nowrap rounded-full bg-sage hover:bg-sage/90 disabled:opacity-50 px-6 py-2.5 text-sm text-white font-medium transition shadow-sm shadow-sage/30"
 					>
 						{update.isPending ? "Saving…" : "Save →"}
 					</button>
 				</div>
 			</header>
 
+			{/* below lg the editor and preview share the screen as tabs */}
+			<div className="lg:hidden -mb-2 flex rounded-full border border-border p-1 text-sm self-start">
+				{(["edit", "preview"] as const).map((t) => (
+					<button
+						key={t}
+						type="button"
+						onClick={() => setTab(t)}
+						className={`rounded-full px-4 py-1.5 capitalize transition ${tab === t ? "bg-sage text-white" : "text-muted-foreground"}`}
+					>
+						{t}
+					</button>
+				))}
+			</div>
+
 			<div className="grid grid-cols-1 lg:grid-cols-2 gap-12 flex-1 min-h-0">
-				<div className="space-y-8 overflow-y-auto pr-2">
+				<div className={`space-y-8 overflow-y-auto lg:pr-2 ${tab === "edit" ? "" : "max-lg:hidden"}`}>
 					<label className="block">
 						<div className="text-[11px] uppercase tracking-[0.2em] font-mono text-muted-foreground mb-2">The prompt</div>
-						<input value={front} onChange={(e) => setFront(e.target.value)} required className={`${fieldBase} font-serif text-2xl leading-snug`} />
+						<textarea
+							value={front}
+							onChange={(e) => setFront(e.target.value)}
+							onKeyDown={submitOnEnter}
+							required
+							rows={1}
+							className={`${fieldBase} resize-none font-serif text-2xl leading-snug`}
+						/>
 					</label>
 
 					<label className="block">
@@ -114,7 +137,7 @@ function EditCard() {
 
 					<section className="mt-12 pt-6 border-t border-coral/30">
 						<div className="text-[11px] uppercase tracking-[0.2em] font-mono text-coral mb-2">Danger zone</div>
-						<div className="flex items-center justify-between gap-4">
+						<div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
 							<p className="text-sm text-muted-foreground italic font-serif">Removes this card and its full review history. There is no undo.</p>
 							<button
 								type="button"
@@ -130,7 +153,7 @@ function EditCard() {
 				<dialog
 					ref={deleteDialogRef}
 					{...{ closedby: "any" }}
-					className="m-auto rounded-xl border border-border bg-card text-foreground p-6 max-w-sm shadow-xl backdrop:bg-black/40"
+					className="m-auto rounded-xl border border-border bg-card text-foreground p-6 w-[calc(100vw-2rem)] max-w-sm shadow-xl backdrop:bg-black/40"
 				>
 					<h2 className="font-serif text-2xl">Delete this card?</h2>
 					<p className="text-sm text-muted-foreground mt-2 italic font-serif">This will remove the card and its review history.</p>
@@ -155,26 +178,26 @@ function EditCard() {
 					</div>
 				</dialog>
 
-				<aside className="overflow-y-auto">
-					<div className="sticky top-0 -mt-2 pt-2 pb-3 bg-background/80 backdrop-blur z-[1]">
+				<aside className={`overflow-y-auto ${tab === "preview" ? "" : "max-lg:hidden"}`}>
+					<div className="max-lg:hidden sticky top-0 -mt-2 pt-2 pb-3 bg-background/80 backdrop-blur z-[1]">
 						<div className="text-[11px] uppercase tracking-[0.2em] font-mono text-muted-foreground">Live preview · how the page will read</div>
 					</div>
 					<article className="max-w-2xl">
-						<div className="relative pl-8 border-l-2 border-sage/40 mb-10">
+						<div className="relative pl-6 sm:pl-8 border-l-2 border-sage/40 mb-10">
 							<div className="absolute -left-2 top-0 w-3 h-3 rounded-full bg-sage" />
 							<h2
-								className="font-serif text-4xl leading-[1.1] tracking-tight [overflow-wrap:anywhere] [&_code]:bg-muted [&_code]:px-2 [&_code]:py-0.5 [&_code]:rounded [&_code]:font-mono [&_code]:text-[0.85em]"
+								className="font-serif text-3xl sm:text-4xl leading-[1.1] tracking-tight [overflow-wrap:anywhere] [&_code]:bg-muted [&_code]:px-2 [&_code]:py-0.5 [&_code]:rounded [&_code]:font-mono [&_code]:text-[0.85em]"
 								dangerouslySetInnerHTML={{ __html: parseInlineMarkdown(front || " ") }}
 							/>
 						</div>
 						<div className="mb-10">
 							<div className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground mb-3">Answer</div>
-							<div className="prose prose-xl max-w-none font-serif [overflow-wrap:anywhere]" dangerouslySetInnerHTML={{ __html: parseBlockMarkdown(back) }} />
+							<div className="prose prose-lg sm:prose-xl max-w-none font-serif [overflow-wrap:anywhere]" dangerouslySetInnerHTML={{ __html: parseBlockMarkdown(back) }} />
 						</div>
 						{detailsHtml ? (
 							<section className="border-t border-border pt-8">
 								<div className="text-[11px] font-mono uppercase tracking-[0.2em] text-muted-foreground mb-4">The lesson</div>
-								<div className="prose prose-lg max-w-none" dangerouslySetInnerHTML={{ __html: detailsHtml }} />
+								<div className="prose sm:prose-lg max-w-none [overflow-wrap:anywhere]" dangerouslySetInnerHTML={{ __html: detailsHtml }} />
 							</section>
 						) : (
 							<div className="border-t border-border pt-8 text-muted-foreground italic font-serif text-sm">No further notes for this card.</div>

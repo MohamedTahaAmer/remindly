@@ -132,7 +132,7 @@ function Library({ onOpen }: { onOpen: (id: string) => void }) {
 				}}
 				disabled={progress !== null}
 				className={cn(
-					"w-full rounded-xl border-2 border-dashed border-border p-10 text-center text-muted-foreground transition-colors",
+					"w-full rounded-xl border-2 border-dashed border-border p-8 sm:p-10 text-center text-muted-foreground transition-colors",
 					dragging && "border-primary bg-accent",
 					progress === null && "cursor-pointer hover:border-primary/50",
 				)}
@@ -143,7 +143,9 @@ function Library({ onOpen }: { onOpen: (id: string) => void }) {
 					</span>
 				) : (
 					<span className="inline-flex items-center gap-2">
-						<Upload className="size-4" /> Drop a video here, or click to pick one (mp4, webm, mov, mkv, m4v)
+						<Upload className="size-4 shrink-0" />
+						<span className="pointer-coarse:hidden">Drop a video here, or click to pick one (mp4, webm, mov, mkv, m4v)</span>
+						<span className="pointer-fine:hidden">Tap to pick a video</span>
 					</span>
 				)}
 			</button>
@@ -163,11 +165,12 @@ function Library({ onOpen }: { onOpen: (id: string) => void }) {
 			{projects.length > 0 && (
 				<ul className="divide-y divide-border rounded-xl border border-border">
 					{projects.map((p) => (
-						<li key={p.id} className="flex items-center gap-3 px-4 py-3">
-							<button type="button" onClick={() => onOpen(p.id)} className="flex-1 cursor-pointer text-left">
-								<span className="text-foreground">{p.name}</span>
-								<span className="ml-3 text-xs text-muted-foreground tabular-nums">
-									{p.duration > 0 && formatTime(p.duration)} · {new Date(p.createdAt).toLocaleString()}
+						<li key={p.id} className="flex items-center gap-3 pl-4 pr-2 py-3">
+							<button type="button" onClick={() => onOpen(p.id)} className="flex-1 min-w-0 cursor-pointer text-left">
+								<span className="block truncate text-foreground">{p.name}</span>
+								<span className="block text-xs text-muted-foreground tabular-nums">
+									{p.duration > 0 && `${formatTime(p.duration)} · `}
+									{new Date(p.createdAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
 								</span>
 							</button>
 							<span
@@ -180,7 +183,7 @@ function Library({ onOpen }: { onOpen: (id: string) => void }) {
 							>
 								{p.status}
 							</span>
-							<Button variant="ghost" size="icon-sm" aria-label="Delete project" onClick={() => deleteProject.mutate({ id: p.id })}>
+							<Button variant="ghost" size="icon" aria-label="Delete project" onClick={() => deleteProject.mutate({ id: p.id })}>
 								<Trash2 />
 							</Button>
 						</li>
@@ -405,7 +408,7 @@ function Editor({ state, onBack }: { state: ProjectState; onBack: () => void }) 
 				<Button variant="ghost" size="sm" onClick={onBack}>
 					<ArrowLeft /> Library
 				</Button>
-				<h2 className="font-serif text-xl truncate">{state.name}</h2>
+				<h2 className="font-serif text-xl truncate min-w-0">{state.name}</h2>
 			</div>
 
 			{transcriptBanner !== null && (
@@ -431,13 +434,13 @@ function Editor({ state, onBack }: { state: ProjectState; onBack: () => void }) 
 					ref={videoRef}
 					src={`${API}/${id}/video`}
 					playsInline
-					className="mx-auto max-h-[50vh]"
+					className="mx-auto max-h-[50dvh]"
 					onPlay={() => setPlaying(true)}
 					onPause={() => setPlaying(false)}
 					onTimeUpdate={(e) => setTime(e.currentTarget.currentTime)}
 				/>
 			</div>
-			<div className="flex flex-wrap items-center gap-4">
+			<div className="flex flex-wrap items-center gap-x-4 gap-y-2">
 				<Button
 					variant="outline"
 					size="icon-sm"
@@ -479,14 +482,14 @@ function Editor({ state, onBack }: { state: ProjectState; onBack: () => void }) 
 						{analyzeMutation.isPending ? <Loader2 className="animate-spin" /> : <Sparkles />} {analyzeMutation.isPending ? "Analyzing…" : "Find mistakes"}
 					</Button>
 				)}
-				<Button size="sm" className="ml-auto" disabled={exporting} onClick={exportVideo}>
+				<Button size="sm" className="max-sm:w-full sm:ml-auto" disabled={exporting} onClick={exportVideo}>
 					{exporting ? <Loader2 className="animate-spin" /> : <Download />} {exporting ? "Rendering…" : "Export video"}
 				</Button>
 			</div>
 
 			{/* timeline */}
 			<div
-				className="relative h-16 w-full cursor-pointer rounded-lg border border-border bg-muted"
+				className="relative h-16 w-full cursor-pointer touch-manipulation rounded-lg border border-border bg-muted"
 				onClick={(e) => {
 					const rect = e.currentTarget.getBoundingClientRect()
 					seek(((e.clientX - rect.left) / rect.width) * duration)
@@ -513,7 +516,7 @@ function Editor({ state, onBack }: { state: ProjectState; onBack: () => void }) 
 
 			{/* transcript */}
 			{state.words && state.words.length > 0 && (
-				<div className="max-h-80 overflow-y-auto rounded-xl border border-border p-4 leading-8">
+				<div className="max-h-[50dvh] sm:max-h-80 overflow-y-auto overscroll-contain rounded-xl border border-border p-3 sm:p-4 leading-8">
 					{transcriptItems.map((item) => {
 						if (item.type === "silence") {
 							if (!item.cut) return null

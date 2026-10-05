@@ -22,7 +22,7 @@ function CardDetail() {
 
 	return (
 		<article className="max-w-3xl mx-auto">
-			<header className="flex items-center justify-between mb-12">
+			<header className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between mb-8 sm:mb-12">
 				<Link to="/cards" className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors">
 					← The index
 				</Link>
@@ -31,10 +31,10 @@ function CardDetail() {
 				</div>
 			</header>
 
-			<div className="relative pl-8 border-l-2 border-sage/40 mb-12">
+			<div className="relative pl-6 sm:pl-8 border-l-2 border-sage/40 mb-8 sm:mb-12">
 				<div className="absolute -left-2 top-0 w-3 h-3 rounded-full bg-sage" />
 				<h1
-					className="font-serif text-4xl md:text-5xl leading-[1.1] tracking-tight [overflow-wrap:anywhere] [&_code]:bg-muted [&_code]:px-2 [&_code]:py-0.5 [&_code]:rounded [&_code]:font-mono [&_code]:text-[0.85em]"
+					className="font-serif text-3xl sm:text-4xl md:text-5xl leading-[1.1] tracking-tight [overflow-wrap:anywhere] [&_code]:bg-muted [&_code]:px-2 [&_code]:py-0.5 [&_code]:rounded [&_code]:font-mono [&_code]:text-[0.85em]"
 					style={{ viewTransitionName: `card-title-${card.id}` }}
 					dangerouslySetInnerHTML={{ __html: parseInlineMarkdown(card.front) }}
 				/>
@@ -43,29 +43,29 @@ function CardDetail() {
 			<details
 				open={revealed}
 				onToggle={(e) => setRevealed((e.target as HTMLDetailsElement).open)}
-				className="group mb-14 [&_summary::-webkit-details-marker]:hidden"
+				className="group mb-10 sm:mb-14 [&_summary::-webkit-details-marker]:hidden"
 			>
-				<summary className="cursor-pointer select-none flex items-center gap-3 text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors">
+				<summary className="cursor-pointer select-none flex items-center gap-3 py-3 -my-3 text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors">
 					<span className="inline-block w-6 border-t border-current" />
 					<span>{revealed ? "Hide answer" : "Reveal answer"}</span>
 				</summary>
 				<div
-					className="mt-6 prose prose-xl max-w-none font-serif [overflow-wrap:anywhere]"
+					className="mt-6 prose prose-lg sm:prose-xl max-w-none font-serif [overflow-wrap:anywhere]"
 					dangerouslySetInnerHTML={{ __html: parseBlockMarkdown(card.back) }}
 				/>
 			</details>
 
 			{detailsHtml ? (
-				<section className="border-t border-border pt-10">
+				<section className="border-t border-border pt-8 sm:pt-10">
 					<div className="text-[11px] font-mono uppercase tracking-[0.2em] text-muted-foreground mb-6">The lesson</div>
-					<div className="prose prose-lg max-w-none" dangerouslySetInnerHTML={{ __html: detailsHtml }} />
+					<div className="prose sm:prose-lg max-w-none [overflow-wrap:anywhere]" dangerouslySetInnerHTML={{ __html: detailsHtml }} />
 				</section>
 			) : (
 				<div className="border-t border-border pt-10 text-muted-foreground italic font-serif text-sm">No further notes for this card.</div>
 			)}
 
-			<footer className="mt-16 pt-6 border-t border-border flex items-center justify-between text-xs font-mono uppercase tracking-[0.2em]">
-				<Link to="/cards/$id/edit" params={{ id }} className="text-muted-foreground hover:text-foreground transition-colors">
+			<footer className="mt-12 sm:mt-16 pt-6 border-t border-border flex items-center justify-between text-xs font-mono uppercase tracking-[0.2em]">
+				<Link to="/cards/$id/edit" params={{ id }} className="py-2 -my-2 text-muted-foreground hover:text-foreground transition-colors">
 					Edit ↗
 				</Link>
 				<span className="text-muted-foreground/60">№ {card.id}</span>

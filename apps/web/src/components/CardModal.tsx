@@ -45,8 +45,9 @@ export function CardModal({ card, open, onOpenChange }: { card: Card; open: bool
 		<Dialog.Root open={open} onOpenChange={onOpenChange}>
 			<Dialog.Portal>
 				<Dialog.Overlay className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-				<Dialog.Content className="fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 w-[95vw] max-w-3xl max-h-[90vh] flex flex-col rounded-xl border border-border bg-card text-card-foreground shadow-xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95">
-					<header className="flex items-start justify-between gap-4 p-6 border-b border-border">
+				{/* phones: bottom sheet (ratings within thumb reach); sm+: centered dialog */}
+				<Dialog.Content className="fixed z-50 flex flex-col border border-border bg-card text-card-foreground shadow-xl inset-x-0 bottom-0 max-h-[92dvh] rounded-t-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-[95vw] sm:max-w-3xl sm:max-h-[90vh] sm:rounded-xl sm:data-[state=open]:slide-in-from-bottom-0 sm:data-[state=closed]:slide-out-to-bottom-0 sm:data-[state=closed]:fade-out-0 sm:data-[state=open]:fade-in-0 sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:zoom-in-95">
+					<header className="flex items-start justify-between gap-4 p-4 sm:p-6 border-b border-border">
 						<Dialog.Title asChild>
 							<h2
 								className="text-xl font-semibold tracking-tight [overflow-wrap:anywhere] [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:font-mono [&_code]:text-[0.9em]"
@@ -57,14 +58,14 @@ export function CardModal({ card, open, onOpenChange }: { card: Card; open: bool
 							<button
 								type="button"
 								aria-label="Close"
-								className="shrink-0 rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition"
+								className="shrink-0 -m-1 rounded-md p-2 sm:p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition"
 							>
 								<X className="h-5 w-5" />
 							</button>
 						</Dialog.Close>
 					</header>
 
-					<div className="flex-1 overflow-y-auto p-6 space-y-6">
+					<div className="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6 space-y-6">
 						<section>
 							<div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">Answer</div>
 							<div className="prose max-w-none [overflow-wrap:anywhere]" dangerouslySetInnerHTML={{ __html: parseBlockMarkdown(card.back) }} />
@@ -82,7 +83,7 @@ export function CardModal({ card, open, onOpenChange }: { card: Card; open: bool
 						)}
 					</div>
 
-					<footer className="border-t border-border p-4 space-y-3">
+					<footer className="border-t border-border p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:pb-4 space-y-3">
 						<div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
 							{RATINGS.map((r) => {
 								const nextIdx = nextIntervalIndex(card.intervalIndex, r.rating)
@@ -92,7 +93,7 @@ export function CardModal({ card, open, onOpenChange }: { card: Card; open: bool
 										key={r.rating}
 										disabled={submit.isPending}
 										onClick={() => submit.mutate({ cardId: card.id, rating: r.rating })}
-										className={`${r.tone} disabled:opacity-50 px-3 py-2 rounded-md text-sm font-medium transition`}
+										className={`${r.tone} disabled:opacity-50 px-3 py-3 sm:py-2 rounded-md text-sm font-medium transition active:scale-[0.97]`}
 									>
 										{r.label}
 										<span className="ml-1.5 text-xs opacity-80">+{days}d</span>
