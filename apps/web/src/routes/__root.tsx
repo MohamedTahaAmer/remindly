@@ -46,11 +46,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			</head>
 			<body className="min-h-screen bg-background text-foreground antialiased">
 				<nav className="border-b border-border bg-background/80 backdrop-blur sticky top-0 z-10">
-					<div className="max-w-6xl mx-auto px-6 py-3 flex items-center gap-6">
-						<Link to="/" className="font-serif text-2xl tracking-tight text-foreground leading-none">
+					<div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-4 sm:gap-6">
+						<Link to="/" className="font-serif text-2xl tracking-tight text-foreground leading-none shrink-0">
 							<span className="text-sage italic">Remind</span>ly
 						</Link>
-						<div className="flex gap-4 text-sm text-muted-foreground">
+						{/* wraps onto a second line on phones instead of overflowing off-screen */}
+						<div className="flex flex-wrap min-w-0 gap-x-4 gap-y-1 whitespace-nowrap text-sm text-muted-foreground">
 							<Link to="/" activeProps={{ className: "text-foreground" }} activeOptions={{ exact: true }}>
 								Today
 							</Link>
@@ -70,7 +71,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 								Texts
 							</Link>
 						</div>
-						<div className="ml-auto">
+						<div className="ml-auto shrink-0">
 							<ThemeToggle />
 						</div>
 					</div>
